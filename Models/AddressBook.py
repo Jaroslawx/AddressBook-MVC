@@ -4,3 +4,6 @@ class AddressBook:
 
     def add_contact(self, contact):
         self.contacts.append(contact)
+
+
+address_book = AddressBook()
