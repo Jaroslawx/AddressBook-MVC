@@ -1,6 +1,4 @@
 from utils.Log import logger
-from Controllers.FileController import file_controller
-from Models.Trivia import trivia
 from Models.AddressBook import address_book
 from Models.Contact import Contact
 from Views.Textual.Interface import textual_view

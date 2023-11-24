@@ -1,5 +1,5 @@
 from utils.Log import logger
-from Controllers.FileController import file_controller
+from Controllers.FileController import FileController
 from Models.AddressBook import address_book
 from Models.Trivia import trivia
 from Views.Textual.Functions import Functions
@@ -8,7 +8,6 @@ import curses
 import threading
 import time
 import datetime
-import sys
 
 
 class Interface:
@@ -74,7 +73,7 @@ class Interface:
                     return 1
                 if selected_option == 1:
                     # Load contacts and start
-                    file_controller.load_contacts_from_file_and_add(address_book)
+                    FileController.load_contacts_and_add()
                     return 1
 
     def display_date(self, date_window, fun_fact):

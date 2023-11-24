@@ -1,7 +1,7 @@
 from utils.Log import logger
-from Models.Contact import Contact
 from Models.AddressBook import address_book
-from Controllers.FileController import file_controller
+from Controllers.ContactController import ContactController
+from Controllers.FileController import FileController
 from prettytable import PrettyTable
 
 import curses
@@ -24,7 +24,6 @@ class Functions:
         info_window = curses.newwin(5, 35, curses.LINES // 2 - 2, curses.COLS // 2 - 20)
         info_window.border(0)
         info_window.addstr(2, 1, message, curses.A_BOLD)
-        logger.log_info(message)
         info_window.refresh()
         info_window.getch()
         info_window.clear()
@@ -90,24 +89,26 @@ class Functions:
             elif key == 10:
                 if selected_option == 0:
                     first_name = Functions.input_text(stdscr, "First Name: ")
+                    selected_option += 1
 
                 elif selected_option == 1:
                     last_name = Functions.input_text(stdscr, "Last Name: ")
+                    selected_option += 1
 
                 elif selected_option == 2:
                     phone_number = Functions.input_text(stdscr, "Phone Number: ")
+                    selected_option += 1
 
                 elif selected_option == 3:
                     email = Functions.input_text(stdscr, "Email: ")
+                    selected_option += 1
 
-                elif selected_option == 4:  # TODO: Send it to Controller
+                elif selected_option == 4:
                     # Create a new contact and add it to the address book
-                    new_contact = Contact(first_name, last_name, phone_number, email)
-                    address_book.add_contact(new_contact)
+                    ContactController.create_contact_and_add(first_name, last_name, phone_number, email)
 
-                    message = "Contact added successfully."
                     # Confirmation message
-                    Functions.display_info(message)
+                    Functions.display_info("Contact added successfully.")
                     break
 
     @staticmethod
@@ -173,11 +174,10 @@ class Functions:
                 # Remove the selected contact
                 if 0 <= selected_contact_index < len(contacts):
                     # Remove the contact from the address book
-                    contacts.pop(selected_contact_index)
+                    ContactController.remove_contact(selected_contact_index)
 
                     # Confirmation message
-                    message = "Contact removed successfully."
-                    Functions.display_info(message)
+                    Functions.display_info("Contact removed successfully.")
 
                     selected_contact_index = max(0,
                                                  selected_contact_index - 1)  # Move the selection up after deleting
@@ -428,7 +428,8 @@ class Functions:
 
     @staticmethod
     def clear_contacts_list():
-        address_book.contacts.clear()
+        # Clear the contacts list
+        ContactController.clear_contacts()
         message = "Contacts cleared successfully."
         Functions.display_info(message)
 
@@ -463,7 +464,7 @@ class Functions:
             elif key == 10:  # Enter
                 if selected_option == 0:
                     # Save contacts
-                    file_controller.save_contacts_to_file('contacts.txt', address_book.contacts)
+                    FileController.save_contacts_to_file('contacts.txt', address_book.contacts)
                     logger.log_info("Application closed.\n")
                     curses.endwin()
                     sys.exit(0)  # Leave the script
