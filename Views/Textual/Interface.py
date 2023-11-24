@@ -76,7 +76,7 @@ class Interface:
                     FileController.load_contacts_and_add()
                     return 1
 
-    def display_date(self, date_window, fun_fact):
+    def display_date(self, date_window, fun_fact):  # TODO: Move date into Controller? Return one string with date?
         while not self.stop_flag.is_set():
             date_window.clear()
             date_window.border(0)

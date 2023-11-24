@@ -6,7 +6,7 @@ import os
 class Trivia:
     def __init__(self, trivia_file="files/trivia.txt"):
         self.trivia_file = trivia_file
-        self.trivia = self.load_trivia()
+        self.list_of_trivia = self.load_trivia()
 
     def load_trivia(self):
         if os.path.exists(self.trivia_file):
@@ -20,7 +20,7 @@ class Trivia:
             return []
 
     def get_random_trivia(self):
-        return random.choice(self.trivia)
+        return random.choice(self.list_of_trivia)
 
 
 trivia = Trivia()

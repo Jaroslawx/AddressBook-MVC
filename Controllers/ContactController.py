@@ -16,6 +16,14 @@ class ContactController:
         logger.log_info(f"Contact deleted from the list.")
 
     @staticmethod
+    def sort_contacts(option, reverse_flag):
+        def sorting_key(contact):  # returns the value of the attribute to be sorted
+            return getattr(contact, option)
+
+        address_book.contacts.sort(key=sorting_key, reverse=reverse_flag)
+        logger.log_info(f"Contacts sorted by {option} in {'descending' if reverse_flag else 'ascending'} order.")
+
+    @staticmethod
     def clear_contacts():
         address_book.contacts.clear()
         logger.log_info(f"Contacts cleared from the list.")

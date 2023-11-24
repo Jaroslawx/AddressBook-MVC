@@ -264,44 +264,22 @@ class Functions:
 
             elif key == 10:  # Enter
                 if selected_option == 0:
-                    # Sort by name
-                    if temp0 == 0:
-                        address_book.contacts.sort(key=lambda contact: contact.first_name)
-                        temp0 = 1
-                    elif temp0 == 1:
-                        address_book.contacts.sort(key=lambda contact: contact.first_name, reverse=True)
-                        temp0 = 0
-                    Functions.display_contacts(stdscr)
+                    ContactController.sort_contacts("first_name", temp0 == 1)
+                    temp0 = 1 - temp0
 
                 elif selected_option == 1:
-                    # Sort by surname
-                    if temp1 == 0:
-                        address_book.contacts.sort(key=lambda contact: contact.last_name)
-                        temp1 = 1
-                    elif temp1 == 1:
-                        address_book.contacts.sort(key=lambda contact: contact.last_name, reverse=True)
-                        temp1 = 0
-                    Functions.display_contacts(stdscr)
+                    ContactController.sort_contacts("last_name", temp1 == 1)
+                    temp1 = 1 - temp1
 
                 elif selected_option == 2:
-                    # Sort by number
-                    if temp2 == 0:
-                        address_book.contacts.sort(key=lambda contact: contact.phone_number)
-                        temp2 = 1
-                    elif temp2 == 1:
-                        address_book.contacts.sort(key=lambda contact: contact.phone_number, reverse=True)
-                        temp2 = 0
-                    Functions.display_contacts(stdscr)
+                    ContactController.sort_contacts("phone_number", temp2 == 1)
+                    temp2 = 1 - temp2
 
                 elif selected_option == 3:
-                    # Sort by email
-                    if temp3 == 0:
-                        address_book.contacts.sort(key=lambda contact: contact.email)
-                        temp3 = 1
-                    elif temp3 == 1:
-                        address_book.contacts.sort(key=lambda contact: contact.email, reverse=True)
-                        temp3 = 0
-                    Functions.display_contacts(stdscr)
+                    ContactController.sort_contacts("email", temp3 == 1)
+                    temp3 = 1 - temp3
+
+                Functions.display_contacts(stdscr)
 
     @staticmethod
     def display_edit_contact(stdscr):

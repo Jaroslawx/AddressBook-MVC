@@ -22,7 +22,12 @@ class FileController:
 
         if file_path:
             try:
-                contacts = FileController.load_contacts_from_file(file_path)
+                with open(file_path, 'r') as file:
+                    reader = csv.reader(file, delimiter=';')
+                    contacts = []
+                    for row in reader:
+                        contacts.append(Contact(row[0], row[1], row[2], row[3]))
+
                 for contact in contacts:
                     address_book.add_contact(contact)
                 logger.log_info("Contacts loaded successfully!")
@@ -31,15 +36,6 @@ class FileController:
                 raise
             finally:
                 root.destroy()
-
-    @staticmethod
-    def load_contacts_from_file(filename):
-        with open(filename, 'r') as file:
-            reader = csv.reader(file, delimiter=';')
-            contacts = []
-            for row in reader:
-                contacts.append(Contact(row[0], row[1], row[2], row[3]))
-            return contacts
 
     @staticmethod
     def save_contacts_to_file(filename, contacts):
