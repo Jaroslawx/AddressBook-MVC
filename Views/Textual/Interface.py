@@ -92,18 +92,9 @@ class Interface:
         stdscr.clear()
         stdscr.refresh()
 
-        # Create windows for menu and date with borders
+        # Create windows for menu and date
         date_window = curses.newwin(7, curses.COLS, 0, 0)
-        date_window.border(0)
-
         menu_window = stdscr.subwin(13, 30, 8, 0)
-        menu_window.border(0)
-
-        # Menu communicate:
-        message = "Menu:"
-
-        menu_window.addstr(1, 1, message, curses.A_BOLD)
-        menu_window.refresh()
 
         # Menu options
         menu_options = ["1. Add contact", "2. Remove contact", "3. Display contacts", "4. Sort contacts",
@@ -113,10 +104,18 @@ class Interface:
         fun_fact = trivia.get_random_trivia()
 
         while True:
+            stdscr.clear()
+            stdscr.refresh()
+
             # Start a thread to continuously refresh the date
             self.stop_flag.clear()
             date_thread = threading.Thread(target=self.display_date, args=(date_window, fun_fact))
             date_thread.start()
+
+            # Menu communicate:
+            message = "Menu:"
+            menu_window.addstr(1, 1, message, curses.A_BOLD)
+            menu_window.border(0)
 
             # Print menu options
             Functions.display_options(menu_window, menu_options, 3, 2, selected_option)
@@ -135,26 +134,33 @@ class Interface:
 
                 if selected_option == 0:
                     # Handle the selected "Add contact" option
+                    Functions.display_add_contact(stdscr)
                     pass
                 elif selected_option == 1:
                     # Handle the selected "Remove contact" option
+                    Functions.display_remove_contact(stdscr)
                     pass
                 elif selected_option == 2:
                     # Handle the selected "Display contacts" option
+                    Functions.display_contacts(stdscr)
                     pass
                 elif selected_option == 3:
                     # Handle the selected "Sort contacts" option
+                    Functions.display_sort_contacts(stdscr)
                     pass
                 elif selected_option == 4:
                     # Handle the selected "Edit contact" option
+                    Functions.display_edit_contact(stdscr)
                     pass
                 elif selected_option == 5:
                     # Handle the selected "Clear contacts" option
+                    Functions.clear_contacts_list()
                     pass
-                if selected_option == 6:
+                elif selected_option == 6:
                     # Handle the selected "Exit" option
-                    curses.endwin()
-                    sys.exit(0)
+                    Functions.display_exit(stdscr)
+                    # curses.endwin()
+                    # sys.exit(0)
 
 
 textual_view = Interface()
