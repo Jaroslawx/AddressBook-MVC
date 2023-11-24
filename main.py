@@ -21,8 +21,8 @@ def main(stdscr):
     address_book.add_contact(contact3)
 
     # Add more contacts for testing purposes
-    # for i in range(25):
-    #     address_book.contacts.append(Contact(f"First{i}", f"Last{i}", f"Phone{i}", f"Email{i}@example.com"))
+    for i in range(35):
+        address_book.contacts.append(Contact(f"First{i}", f"Last{i}", f"Phone{i}", f"Email{i}@example.com"))
 
     if textual_view.display_start(stdscr) == 1:
         while True:
