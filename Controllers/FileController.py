@@ -52,6 +52,3 @@ class FileController:
         except Exception as e:
             logger.log_error(f"Error saving contacts to file: {e}")
             raise
-
-
-file_controller = FileController()
