@@ -5,6 +5,7 @@ from Models.Contact import Contact
 
 import tkinter as tk
 import csv
+import os
 
 
 class FileController:
@@ -43,10 +44,14 @@ class FileController:
     @staticmethod
     def save_contacts_to_file(filename, contacts):
         try:
-            with open(filename, 'w') as file:
+            file_path = os.path.join("files", filename)
+            with open(file_path, 'w', encoding='utf-8') as file:
                 for contact in contacts:
                     file.write(f"{contact.first_name};{contact.last_name};{contact.phone_number};{contact.email}\n")
             logger.log_info("Contacts saved successfully.")
         except Exception as e:
             logger.log_error(f"Error saving contacts to file: {e}")
             raise
+
+
+file_controller = FileController()
