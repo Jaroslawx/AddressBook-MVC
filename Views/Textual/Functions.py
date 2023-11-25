@@ -10,13 +10,13 @@ import sys
 
 class Functions:
     @staticmethod
-    def display_options(stdscr, options, y, x, selected_option):
+    def display_options(window, options, y, x, selected_option):
         # Print options
         for i, option in enumerate(options):
             if i == selected_option:
-                stdscr.addstr(y + i, x, f"> {option}", curses.A_BOLD)
+                window.addstr(y + i, x, f"> {option}", curses.A_BOLD)
             else:
-                stdscr.addstr(y + i, x, f"> {option}")
+                window.addstr(y + i, x, f"> {option}")
 
     @staticmethod
     def display_info(message):
@@ -27,6 +27,61 @@ class Functions:
         info_window.refresh()
         info_window.getch()
         info_window.clear()
+
+    @staticmethod
+    def display_list(window, contacts, start, rows, index, type_message, info_message):
+        window.clear()
+        window.refresh()
+
+        window.border(0)
+
+        window.addstr(1, 1, type_message, curses.A_BOLD)
+        window.addstr(2, 2, info_message, curses.A_REVERSE)
+
+        # Print contacts list
+        for i, contact in enumerate(contacts[start:start + rows]):
+            if i + start == index:
+                window.addstr(4 + i, 2,
+                              f"> {contact.first_name} {contact.last_name} {contact.phone_number} "
+                              f"{contact.email}", curses.A_REVERSE)
+            else:
+                window.addstr(4 + i, 2,
+                              f"  {contact.first_name} {contact.last_name} {contact.phone_number} "
+                              f"{contact.email}")
+
+        window.refresh()
+
+    @staticmethod
+    def handle_input(key, index, start, rows, list_length):
+        if key == 27:  # Escape
+
+            return "exit", index, start
+
+        elif key == curses.KEY_DOWN:
+            if index < list_length - 1:
+                index += 1
+
+                if index >= start + rows:
+                    start += 1
+
+            elif index >= list_length - 1:
+                index = 0
+                start = 0
+
+        elif key == curses.KEY_UP:
+            if index > 0:
+                index -= 1
+
+                if index < start:
+                    start -= 1
+            elif index <= 0:
+                index = list_length - 1
+                start = list_length - rows
+
+        elif key == curses.KEY_ENTER or key in [10, 13]:
+            return "enter", index, start
+
+        return "continue", index, start
 
     @staticmethod
     def input_text(stdscr, message, old=''):
@@ -89,19 +144,15 @@ class Functions:
             elif key == 10:
                 if selected_option == 0:
                     first_name = Functions.input_text(stdscr, "First Name: ")
-                    selected_option += 1
 
                 elif selected_option == 1:
                     last_name = Functions.input_text(stdscr, "Last Name: ")
-                    selected_option += 1
 
                 elif selected_option == 2:
                     phone_number = Functions.input_text(stdscr, "Phone Number: ")
-                    selected_option += 1
 
                 elif selected_option == 3:
                     email = Functions.input_text(stdscr, "Email: ")
-                    selected_option += 1
 
                 elif selected_option == 4:
                     # Create a new contact and add it to the address book
@@ -110,67 +161,36 @@ class Functions:
                     # Confirmation message
                     Functions.display_info("Contact added successfully.")
                     break
+                selected_option += 1
 
     @staticmethod
     def display_remove_contact(stdscr):
         stdscr.clear()
         stdscr.refresh()
 
-        # Create a sub window for the remove menu
-        remove_window = stdscr.subwin(0, curses.COLS, 0, 0)
-
         contacts = address_book.contacts
         selected_contact_index = 0
         visible_start = 0
         visible_rows = curses.LINES - 6
 
+        # Create a sub window for the remove menu
+        remove_window = stdscr.subwin(0, curses.COLS // 2 + 5, 0, 0)
+
         while True:
-            remove_window.clear()
-            remove_window.refresh()
-
-            remove_window.border(0)
-            remove_window.addstr(1, 1, "Remove contact:", curses.A_BOLD)
-            remove_window.addstr(2, 2, "Press esc to leave.", curses.A_REVERSE)
-            remove_window.refresh()
-
-            # Print contacts list
-            for i, contact in enumerate(contacts[visible_start:visible_start + visible_rows]):
-                if i + visible_start == selected_contact_index:
-                    remove_window.addstr(4 + i, 2,
-                                         f"> {contact.first_name} {contact.last_name} {contact.phone_number} "
-                                         f"{contact.email}", curses.A_REVERSE)
-                else:
-                    remove_window.addstr(4 + i, 2,
-                                         f"  {contact.first_name} {contact.last_name} {contact.phone_number} "
-                                         f"{contact.email}")
+            Functions.display_list(remove_window, contacts, visible_start, visible_rows, selected_contact_index,
+                                   "Remove contact:", "Press esc to leave.")
 
             # Wait for key
             key = remove_window.getch()
 
-            if key == 27:  # Escape
-                break  # Exit the loop and return to the main menu
+            result, selected_contact_index, visible_start = Functions.handle_input(key, selected_contact_index,
+                                                                                   visible_start,
+                                                                                   visible_rows, len(contacts))
 
-            elif key == curses.KEY_DOWN and selected_contact_index < len(contacts) - 1:
-                selected_contact_index += 1
+            if result == "exit":
+                break  # Exit the loop
 
-                if selected_contact_index >= visible_start + visible_rows:
-                    visible_start += 1
-
-            elif key == curses.KEY_DOWN and selected_contact_index >= len(contacts) - 1:
-                selected_contact_index = 0
-                visible_start = 0
-
-            elif key == curses.KEY_UP and selected_contact_index > 0:
-                selected_contact_index -= 1
-
-                if selected_contact_index < visible_start:
-                    visible_start -= 1
-
-            elif key == curses.KEY_UP and selected_contact_index <= 0:
-                selected_contact_index = len(contacts) - 1
-                visible_start = len(contacts) - visible_rows
-
-            elif key == curses.KEY_ENTER or key in [10, 13]:  # Enter
+            elif result == "enter":
                 # Remove the selected contact
                 if 0 <= selected_contact_index < len(contacts):
                     # Remove the contact from the address book
@@ -286,67 +306,35 @@ class Functions:
         stdscr.clear()
         stdscr.refresh()
 
-        edit_window = stdscr.subwin(0, curses.COLS, 0, 0)
-
         contacts = address_book.contacts
         selected_contact_index = 0
         visible_start = 0
         visible_rows = curses.LINES - 6
 
+        # Create a sub window for the edit menu
+        edit_window = stdscr.subwin(0, curses.COLS // 2 + 6, 0, 0)
+
         while True:
-            edit_window.clear()
-            edit_window.refresh()
+            Functions.display_list(edit_window, contacts, visible_start, visible_rows, selected_contact_index,
+                                   "Edit contact:", "Press esc to leave.")
 
-            edit_window.border(0)
-            edit_window.addstr(1, 1, "Choose contact to edit:", curses.A_BOLD)
-            # Info
-            edit_window.addstr(2, 2, "Press esc to leave.", curses.A_REVERSE)
-            edit_window.refresh()
-
-            # Wypisz listę kontaktów
-            for i, contact in enumerate(contacts[visible_start:visible_start + visible_rows]):
-                if i + visible_start == selected_contact_index:
-                    edit_window.addstr(4 + i, 2,
-                                       f"> {contact.first_name} {contact.last_name} {contact.phone_number} "
-                                       f"{contact.email}", curses.A_REVERSE)
-                else:
-                    edit_window.addstr(4 + i, 2,
-                                       f"  {contact.first_name} {contact.last_name} {contact.phone_number} "
-                                       f"{contact.email}")
-
-            # Wprowadzanie klawisza
+            # Wait for key
             key = edit_window.getch()
 
-            if key == 27:  # Escape
-                break  # Wyjście z pętli
+            result, selected_contact_index, visible_start = Functions.handle_input(key, selected_contact_index,
+                                                                                   visible_start, visible_rows,
+                                                                                   len(contacts))
 
-            elif key == curses.KEY_DOWN and selected_contact_index < len(contacts) - 1:
-                selected_contact_index += 1
+            if result == "exit":  # Escape
+                break  # Exit the loop
 
-                if selected_contact_index >= visible_start + visible_rows:
-                    visible_start += 1
-
-            elif key == curses.KEY_DOWN and selected_contact_index >= len(contacts) - 1:
-                selected_contact_index = 0
-                visible_start = 0
-
-            elif key == curses.KEY_UP and selected_contact_index > 0:
-                selected_contact_index -= 1
-
-                if selected_contact_index < visible_start:
-                    visible_start -= 1
-
-            elif key == curses.KEY_UP and selected_contact_index <= 0:
-                selected_contact_index = len(contacts) - 1
-                visible_start = len(contacts) - visible_rows
-
-            elif key == curses.KEY_ENTER or key in [10, 13]:  # Enter
-                # Usuń wybrany kontakt
+            elif result == "enter":  # Enter
+                # Edit the selected contact
                 if 0 <= selected_contact_index < len(contacts):
                     stdscr.clear()
                     stdscr.refresh()
 
-                    edit_contact_window = stdscr.subwin(10, 50, 0, 0)  # Utworzenie okna na menu
+                    edit_contact_window = stdscr.subwin(10, 50, 0, 0)  # Create a sub window
 
                     # Menu options
                     enter_options = ["Name", "Surname", "Number", "Email", "Confirm"]
@@ -373,7 +361,7 @@ class Functions:
                         key = edit_contact_window.getch()
 
                         if key == 27:  # Escape
-                            break  # Wyjście z pętli
+                            break  # Exit the loop
 
                         elif key == curses.KEY_DOWN:
                             selected_option = (selected_option + 1) % len(enter_options)
@@ -382,27 +370,31 @@ class Functions:
                             selected_option = (selected_option - 1) % len(enter_options)
                         elif key == 10:
                             if selected_option == 0:
-                                contacts[selected_contact_index].first_name = Functions.input_text(stdscr, "First Name: ", first_name)
+                                contacts[selected_contact_index].first_name = Functions.input_text(stdscr,
+                                                                                                   "First Name: ",
+                                                                                                   first_name)
 
                             elif selected_option == 1:
                                 contacts[selected_contact_index].last_name = Functions.input_text(stdscr, "Last Name: ",
-                                                                                                last_name)
+                                                                                                  last_name)
 
                             elif selected_option == 2:
                                 contacts[selected_contact_index].phone_number = Functions.input_text(stdscr,
-                                                                                                   "Phone Number: ",
-                                                                                                   phone_number)
+                                                                                                     "Phone Number: ",
+                                                                                                     phone_number)
 
                             elif selected_option == 3:
                                 contacts[selected_contact_index].email = Functions.input_text(stdscr, "Email: ", email)
 
                             elif selected_option == 4:
-                                # Tworzenie kontaktu i dodawanie go do książki adresowej
+                                # Confirmation changes
 
                                 message = "Contact edited successfully."
-                                # Potwierdzenie dodania kontaktu
+                                # Confirmation message
                                 Functions.display_info(message)
                                 break
+
+                            selected_option += 1
 
     @staticmethod
     def clear_contacts_list():
@@ -415,17 +407,22 @@ class Functions:
     def display_exit(stdscr):
         stdscr.clear()
         stdscr.refresh()
-        curses.noecho()
 
         # Menu options
         exit_options = ["1. Save contacts", "2. Without saving", "3. Back"]
         selected_option = 0
 
-        exit_window = stdscr.subwin(6, 30, 0, 0)
-        exit_window.border(0)
-        # TODO: try set window on the middle
+        screen_height, screen_width = stdscr.getmaxyx()
 
-        # Print "Exit options:"
+        # put window in the center
+        exit_window_height, exit_window_width = 6, 30
+        exit_window_y = (screen_height - exit_window_height) // 2
+        exit_window_x = (screen_width - exit_window_width) // 2
+
+        exit_window = stdscr.subwin(exit_window_height, exit_window_width, exit_window_y, exit_window_x)
+        exit_window.border(0)
+
+        # Print message
         exit_window.addstr(1, 10, "Exit options:", curses.A_BOLD)
 
         while True:

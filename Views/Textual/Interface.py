@@ -1,6 +1,5 @@
 from utils.Log import logger
 from Controllers.FileController import FileController
-from Models.AddressBook import address_book
 from Models.Trivia import trivia
 from Views.Textual.Functions import Functions
 
@@ -134,7 +133,7 @@ class Interface:
                 if selected_option == 0:
                     # Handle the selected "Add contact" option
                     Functions.display_add_contact(stdscr)
-                    pass
+
                 elif selected_option == 1:
                     # Handle the selected "Remove contact" option
                     Functions.display_remove_contact(stdscr)
@@ -142,24 +141,22 @@ class Interface:
                 elif selected_option == 2:
                     # Handle the selected "Display contacts" option
                     Functions.display_contacts(stdscr)
-                    pass
+
                 elif selected_option == 3:
                     # Handle the selected "Sort contacts" option
                     Functions.display_sort_contacts(stdscr)
-                    pass
+
                 elif selected_option == 4:
                     # Handle the selected "Edit contact" option
                     Functions.display_edit_contact(stdscr)
-                    pass
+
                 elif selected_option == 5:
                     # Handle the selected "Clear contacts" option
                     Functions.clear_contacts_list()
-                    pass
+
                 elif selected_option == 6:
                     # Handle the selected "Exit" option
                     Functions.display_exit(stdscr)
-                    # curses.endwin()
-                    # sys.exit(0)
 
 
 textual_view = Interface()
