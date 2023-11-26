@@ -12,8 +12,9 @@ class ContactController:
 
     @staticmethod
     def remove_contact(index):
+        address_book.removed_contacts.append(address_book.contacts[index])
         address_book.contacts.pop(index)
-        logger.log_info(f"Contact deleted from the list.")
+        logger.log_info(f"Contact deleted from the list and added to the recycle bin.")
 
     @staticmethod
     def sort_contacts(option, reverse_flag):
@@ -26,4 +27,5 @@ class ContactController:
     @staticmethod
     def clear_contacts():
         address_book.contacts.clear()
-        logger.log_info(f"Contacts cleared from the list.")
+        address_book.removed_contacts.clear()
+        logger.log_info(f"Contacts cleared from the list and recycle bin.")

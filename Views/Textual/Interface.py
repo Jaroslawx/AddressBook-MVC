@@ -75,7 +75,7 @@ class Interface:
                     FileController.load_contacts_and_add()
                     return 1
 
-    def display_date(self, date_window, fun_fact):  # TODO: Move date into Controller? Return one string with date?
+    def display_date(self, date_window, fun_fact):
         while not self.stop_flag.is_set():
             date_window.clear()
             date_window.border(0)
@@ -96,7 +96,7 @@ class Interface:
 
         # Menu options
         menu_options = ["1. Add contact", "2. Remove contact", "3. Display contacts", "4. Sort contacts",
-                        "5. Edit contact", "6. Clear contacts", "X. Exit"]
+                        "5. Edit contact", "6. Clear contacts", "7. Recycle bin", "X. Exit"]
         selected_option = 0
 
         fun_fact = trivia.get_random_trivia()
@@ -155,6 +155,10 @@ class Interface:
                     Functions.clear_contacts_list()
 
                 elif selected_option == 6:
+                    # Handle the selected "Recycle bin" option
+                    Functions.display_recycle_bin(stdscr)
+
+                elif selected_option == 7:
                     # Handle the selected "Exit" option
                     Functions.display_exit(stdscr)
 

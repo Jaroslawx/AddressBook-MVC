@@ -24,9 +24,9 @@ class Functions:
         info_window = curses.newwin(5, 35, curses.LINES // 2 - 2, curses.COLS // 2 - 20)
         info_window.border(0)
         info_window.addstr(2, 1, message, curses.A_BOLD)
-        info_window.refresh()
         info_window.getch()
         info_window.clear()
+        info_window.refresh()
 
     @staticmethod
     def display_list(window, contacts, start, rows, index, type_message, info_message):
@@ -76,7 +76,7 @@ class Functions:
                     start -= 1
             elif index <= 0:
                 index = list_length - 1
-                start = list_length - rows
+                start = max(0, list_length - rows)
 
         elif key == curses.KEY_ENTER or key in [10, 13]:
             return "enter", index, start
@@ -402,6 +402,46 @@ class Functions:
         ContactController.clear_contacts()
         message = "Contacts cleared successfully."
         Functions.display_info(message)
+
+    @staticmethod
+    def display_recycle_bin(stdscr):
+        stdscr.clear()
+        stdscr.refresh()
+
+        contacts = address_book.removed_contacts
+        selected_contact_index = 0
+        visible_start = 0
+        visible_rows = curses.LINES - 6
+
+        # Create a sub window for the recycle bin menu
+        recycle_bin_window = stdscr.subwin(0, curses.COLS // 2 + 4, 0, 0)
+
+        while True:
+            Functions.display_list(recycle_bin_window, contacts, visible_start, visible_rows, selected_contact_index,
+                                   "Recycle bin:", "Press esc to leave.")
+
+            # Wait for key
+            key = recycle_bin_window.getch()
+
+            result, selected_contact_index, visible_start = Functions.handle_input(key, selected_contact_index,
+                                                                                   visible_start, visible_rows,
+                                                                                   len(contacts))
+
+            if result == "exit":
+                break
+
+            elif result == "enter":
+                # Restore the selected contact
+                if 0 <= selected_contact_index < len(contacts):
+                    # Restore the contact to the address book
+                    address_book.contacts.append(address_book.removed_contacts[selected_contact_index])
+                    address_book.removed_contacts.pop(selected_contact_index)
+
+                    # Confirmation message
+                    Functions.display_info("Contact restored successfully.")
+
+                    selected_contact_index = max(0,
+                                                 selected_contact_index - 1)
 
     @staticmethod
     def display_exit(stdscr):
