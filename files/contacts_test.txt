@@ -1,0 +1,6 @@
+John;Doe;123-456-7890;john.doe@example.com
+Alice;Smith;555-123-4567;alice.smith@example.com
+Bob;Johnson;123-555-7890;bob.johnson@example.com
+Carol;Williams;987-654-3210;carol.williams@example.com
+David;Brown;321-987-6543;david.brown@example.com
+Emily;Davis;777-888-9999;emily.davis@example.com
