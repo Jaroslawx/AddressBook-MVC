@@ -9,17 +9,78 @@ import time
 import datetime
 
 
-class Interface:
+class TUI:
     def __init__(self):
         self.stop_flag = threading.Event()
 
     @staticmethod
-    def display_start(stdscr):
-        logger.log_info("Entry screen loaded.")
+    def choose_interface_mode(stdscr):
+        logger.log_info("Choose interface mode loaded.")
+
         # Setting the text cursor mode and waiting for input mode
         curses.curs_set(0)
         curses.noecho()
         stdscr.nodelay(0)
+
+        # Set color
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.color_pair(1)
+
+        # Console sizes download
+        height, width = stdscr.getmaxyx()
+
+        # Welcome communicate
+        welcome_message = "Welcome to Address Book"
+        # Position calculating
+        x = (width - len(welcome_message)) // 2
+        y = height // 3
+
+        # Print welcome message
+        stdscr.addstr(y, x, welcome_message, curses.color_pair(1) | curses.A_BOLD)
+        stdscr.refresh()
+
+        # Menu options
+        start_options = ["Textual", "Graphical"]
+        selected_option = 0
+
+        # Welcome communicate
+        input_message = "Choose view mode..."
+        # Position calculating
+        x = (width - len(input_message)) // 2 - 1
+        y = height // 2
+
+        stdscr.addstr(y + 2, x, input_message, curses.A_BLINK)
+        stdscr.refresh()
+
+        x = (width - len(welcome_message)) // 2
+        y = (height // 3) + 3
+
+        # Waiting for Enter
+        while True:
+            # Print start menu options
+            Functions.display_options(stdscr, start_options, y, x, selected_option)
+
+            stdscr.refresh()
+            key = stdscr.getch()
+
+            if key == curses.KEY_DOWN:
+                selected_option = (selected_option + 1) % len(start_options)
+            elif key == curses.KEY_UP:
+                selected_option = (selected_option - 1) % len(start_options)
+            elif key == 10:  # Enter
+                if selected_option == 0:
+                    # textual
+                    return "textual"
+                if selected_option == 1:
+                    # graphical
+                    return "graphical"
+
+    @staticmethod
+    def display_start(stdscr):
+        logger.log_info("Entry screen loaded.")
+
+        stdscr.clear()
+        stdscr.refresh()
 
         # Set color
         curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
@@ -163,4 +224,4 @@ class Interface:
                     Functions.display_exit(stdscr)
 
 
-textual_view = Interface()
+textual_view = TUI()
