@@ -17,8 +17,10 @@ class CLI:
     def display_start(self):
         logger.log_info("Entry screen loaded.")
 
-        self.stdscr.clear()
-        self.stdscr.refresh()
+        # Setting the text cursor mode and waiting for input mode
+        curses.curs_set(0)
+        curses.noecho()
+        self.stdscr.nodelay(False)
 
         # Set color
         curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
@@ -161,7 +163,7 @@ class CLI:
                     # Handle the selected "Exit" option
                     CLIFunctions.display_exit(self.stdscr)
 
-    def start_tui(self):
+    def start_cli(self):
         logger.log_info("Application started in textual mode")
 
         CLI.display_start(self)
