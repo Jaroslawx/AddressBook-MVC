@@ -14,67 +14,6 @@ class TUI:
         self.stop_flag = threading.Event()
         self.stdscr = stdscr
 
-    def choose_interface_mode(self):
-        logger.log_info("Choose interface mode loaded.")
-
-        # Setting the text cursor mode and waiting for input mode
-        curses.curs_set(0)
-        curses.noecho()
-        self.stdscr.nodelay(False)
-
-        # Set color
-        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
-        curses.color_pair(1)
-
-        # Console sizes download
-        height, width = self.stdscr.getmaxyx()
-
-        # Welcome communicate
-        welcome_message = "Welcome to Address Book"
-        # Position calculating
-        x = (width - len(welcome_message)) // 2
-        y = height // 3
-
-        # Print welcome message
-        self.stdscr.addstr(y, x, welcome_message, curses.color_pair(1) | curses.A_BOLD)
-        self.stdscr.refresh()
-
-        # Menu options
-        start_options = ["Textual", "Graphical"]
-        selected_option = 0
-
-        # Welcome communicate
-        input_message = "Choose view mode..."
-        # Position calculating
-        x = (width - len(input_message)) // 2 - 1
-        y = height // 2
-
-        self.stdscr.addstr(y + 2, x, input_message, curses.A_BLINK)
-        self.stdscr.refresh()
-
-        x = (width - len(welcome_message)) // 2
-        y = (height // 3) + 3
-
-        # Waiting for Enter
-        while True:
-            # Print start menu options
-            Functions.display_options(self.stdscr, start_options, y, x, selected_option)
-
-            self.stdscr.refresh()
-            key = self.stdscr.getch()
-
-            if key == curses.KEY_DOWN:
-                selected_option = (selected_option + 1) % len(start_options)
-            elif key == curses.KEY_UP:
-                selected_option = (selected_option - 1) % len(start_options)
-            elif key == 10:  # Enter
-                if selected_option == 0:
-                    # textual
-                    return "textual"
-                if selected_option == 1:
-                    # graphical
-                    return "graphical"
-
     def display_start(self):
         logger.log_info("Entry screen loaded.")
 
