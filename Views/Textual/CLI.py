@@ -9,7 +9,7 @@ import time
 import datetime
 
 
-class TUI:
+class CLI:
     def __init__(self, stdscr):
         self.stop_flag = threading.Event()
         self.stdscr = stdscr
@@ -68,11 +68,11 @@ class TUI:
             elif key == 10:  # Enter
                 if selected_option == 0:
                     # Start
-                    TUI.display_menu(self)
+                    CLI.display_menu(self)
                 if selected_option == 1:
                     # Load contacts and start
                     FileController.load_contacts_and_add()
-                    TUI.display_menu(self)
+                    CLI.display_menu(self)
 
     def display_date(self, date_window, fun_fact):
         while not self.stop_flag.is_set():
@@ -164,4 +164,4 @@ class TUI:
     def start_tui(self):
         logger.log_info("Application started in textual mode")
 
-        TUI.display_start(self)
+        CLI.display_start(self)
