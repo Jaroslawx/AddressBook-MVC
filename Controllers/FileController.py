@@ -38,7 +38,7 @@ class FileController:
                 root.destroy()
 
     @staticmethod
-    def save_contacts_to_file(filename, contacts):
+    def save_contacts_to_file(filename="contact.txt", contacts=address_book.contacts):
         try:
             file_path = os.path.join("files", filename)
             with open(file_path, 'w', encoding='utf-8') as file:
