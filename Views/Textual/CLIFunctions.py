@@ -8,7 +8,7 @@ import curses
 import sys
 
 
-class Functions:
+class CLIFunctions:
     @staticmethod
     def display_options(window, options, y, x, selected_option):
         # Print options
@@ -122,7 +122,7 @@ class Functions:
 
             contact_window.addstr(1, 1, "Add Contact:", curses.A_BOLD)
             contact_window.border(0)
-            Functions.display_options(contact_window, enter_options, 3, 2, selected_option)
+            CLIFunctions.display_options(contact_window, enter_options, 3, 2, selected_option)
 
             contact_window.addstr(3, 14, first_name, curses.A_BOLD)
             contact_window.addstr(4, 14, last_name, curses.A_BOLD)
@@ -143,23 +143,23 @@ class Functions:
                 selected_option = (selected_option - 1) % len(enter_options)
             elif key == 10:
                 if selected_option == 0:
-                    first_name = Functions.input_text(stdscr, "First Name: ")
+                    first_name = CLIFunctions.input_text(stdscr, "First Name: ")
 
                 elif selected_option == 1:
-                    last_name = Functions.input_text(stdscr, "Last Name: ")
+                    last_name = CLIFunctions.input_text(stdscr, "Last Name: ")
 
                 elif selected_option == 2:
-                    phone_number = Functions.input_text(stdscr, "Phone Number: ")
+                    phone_number = CLIFunctions.input_text(stdscr, "Phone Number: ")
 
                 elif selected_option == 3:
-                    email = Functions.input_text(stdscr, "Email: ")
+                    email = CLIFunctions.input_text(stdscr, "Email: ")
 
                 elif selected_option == 4:
                     # Create a new contact and add it to the address book
                     ContactController.create_contact_and_add(first_name, last_name, phone_number, email)
 
                     # Confirmation message
-                    Functions.display_info("Contact added successfully.")
+                    CLIFunctions.display_info("Contact added successfully.")
                     break
                 selected_option += 1
 
@@ -177,15 +177,15 @@ class Functions:
         remove_window = stdscr.subwin(0, curses.COLS // 2 + 5, 0, 0)
 
         while True:
-            Functions.display_list(remove_window, contacts, visible_start, visible_rows, selected_contact_index,
+            CLIFunctions.display_list(remove_window, contacts, visible_start, visible_rows, selected_contact_index,
                                    "Remove contact:", "Press esc to leave.")
 
             # Wait for key
             key = remove_window.getch()
 
-            result, selected_contact_index, visible_start = Functions.handle_input(key, selected_contact_index,
-                                                                                   visible_start,
-                                                                                   visible_rows, len(contacts))
+            result, selected_contact_index, visible_start = CLIFunctions.handle_input(key, selected_contact_index,
+                                                                                      visible_start,
+                                                                                      visible_rows, len(contacts))
 
             if result == "exit":
                 break  # Exit the loop
@@ -197,7 +197,7 @@ class Functions:
                     ContactController.remove_contact(selected_contact_index)
 
                     # Confirmation message
-                    Functions.display_info("Contact removed successfully.")
+                    CLIFunctions.display_info("Contact removed successfully.")
 
                     selected_contact_index = max(0,
                                                  selected_contact_index - 1)  # Move the selection up after deleting
@@ -235,19 +235,19 @@ class Functions:
                 break  # Exit the loop
 
             elif key == curses.KEY_DOWN and visible_start < len(address_book.contacts) - visible_rows:
-                Functions.display_contacts(stdscr, visible_start + 1)
+                CLIFunctions.display_contacts(stdscr, visible_start + 1)
                 break
 
             elif key == curses.KEY_DOWN and visible_start >= len(address_book.contacts) - visible_rows:
-                Functions.display_contacts(stdscr)
+                CLIFunctions.display_contacts(stdscr)
                 break
 
             elif key == curses.KEY_UP and visible_start > 0:
-                Functions.display_contacts(stdscr, visible_start - 1)
+                CLIFunctions.display_contacts(stdscr, visible_start - 1)
                 break
 
             elif key == curses.KEY_UP and visible_start <= 0:
-                Functions.display_contacts(stdscr, len(address_book.contacts) - visible_rows)
+                CLIFunctions.display_contacts(stdscr, len(address_book.contacts) - visible_rows)
                 break
 
     @staticmethod
@@ -269,7 +269,7 @@ class Functions:
             sort_window.border(0)
             sort_window.addstr(1, 1, "Sort contacts by:", curses.A_BOLD)
 
-            Functions.display_options(sort_window, sort_options, 3, 2, selected_option)
+            CLIFunctions.display_options(sort_window, sort_options, 3, 2, selected_option)
 
             key = sort_window.getch()
 
@@ -299,7 +299,7 @@ class Functions:
                     ContactController.sort_contacts("email", temp3 == 1)
                     temp3 = 1 - temp3
 
-                Functions.display_contacts(stdscr)
+                CLIFunctions.display_contacts(stdscr)
 
     @staticmethod
     def display_edit_contact(stdscr):
@@ -315,15 +315,15 @@ class Functions:
         edit_window = stdscr.subwin(0, curses.COLS // 2 + 6, 0, 0)
 
         while True:
-            Functions.display_list(edit_window, contacts, visible_start, visible_rows, selected_contact_index,
+            CLIFunctions.display_list(edit_window, contacts, visible_start, visible_rows, selected_contact_index,
                                    "Edit contact:", "Press esc to leave.")
 
             # Wait for key
             key = edit_window.getch()
 
-            result, selected_contact_index, visible_start = Functions.handle_input(key, selected_contact_index,
-                                                                                   visible_start, visible_rows,
-                                                                                   len(contacts))
+            result, selected_contact_index, visible_start = CLIFunctions.handle_input(key, selected_contact_index,
+                                                                                      visible_start, visible_rows,
+                                                                                      len(contacts))
 
             if result == "exit":  # Escape
                 break  # Exit the loop
@@ -350,7 +350,7 @@ class Functions:
 
                         edit_contact_window.addstr(1, 1, "Edit Contact:", curses.A_BOLD)
                         edit_contact_window.border(0)
-                        Functions.display_options(edit_contact_window, enter_options, 3, 2, selected_option)
+                        CLIFunctions.display_options(edit_contact_window, enter_options, 3, 2, selected_option)
 
                         edit_contact_window.addstr(3, 14, contacts[selected_contact_index].first_name, curses.A_BOLD)
                         edit_contact_window.addstr(4, 14, contacts[selected_contact_index].last_name, curses.A_BOLD)
@@ -370,28 +370,28 @@ class Functions:
                             selected_option = (selected_option - 1) % len(enter_options)
                         elif key == 10:
                             if selected_option == 0:
-                                contacts[selected_contact_index].first_name = Functions.input_text(stdscr,
+                                contacts[selected_contact_index].first_name = CLIFunctions.input_text(stdscr,
                                                                                                    "First Name: ",
-                                                                                                   first_name)
+                                                                                                      first_name)
 
                             elif selected_option == 1:
-                                contacts[selected_contact_index].last_name = Functions.input_text(stdscr, "Last Name: ",
-                                                                                                  last_name)
+                                contacts[selected_contact_index].last_name = CLIFunctions.input_text(stdscr, "Last Name: ",
+                                                                                                     last_name)
 
                             elif selected_option == 2:
-                                contacts[selected_contact_index].phone_number = Functions.input_text(stdscr,
+                                contacts[selected_contact_index].phone_number = CLIFunctions.input_text(stdscr,
                                                                                                      "Phone Number: ",
-                                                                                                     phone_number)
+                                                                                                        phone_number)
 
                             elif selected_option == 3:
-                                contacts[selected_contact_index].email = Functions.input_text(stdscr, "Email: ", email)
+                                contacts[selected_contact_index].email = CLIFunctions.input_text(stdscr, "Email: ", email)
 
                             elif selected_option == 4:
                                 # Confirmation changes
 
                                 message = "Contact edited successfully."
                                 # Confirmation message
-                                Functions.display_info(message)
+                                CLIFunctions.display_info(message)
                                 break
 
                             selected_option += 1
@@ -401,7 +401,7 @@ class Functions:
         # Clear the contacts list
         ContactController.clear_contacts()
         message = "Contacts cleared successfully."
-        Functions.display_info(message)
+        CLIFunctions.display_info(message)
 
     @staticmethod
     def display_recycle_bin(stdscr):
@@ -417,15 +417,15 @@ class Functions:
         recycle_bin_window = stdscr.subwin(0, curses.COLS // 2 + 4, 0, 0)
 
         while True:
-            Functions.display_list(recycle_bin_window, contacts, visible_start, visible_rows, selected_contact_index,
+            CLIFunctions.display_list(recycle_bin_window, contacts, visible_start, visible_rows, selected_contact_index,
                                    "Recycle bin:", "Press esc to leave.")
 
             # Wait for key
             key = recycle_bin_window.getch()
 
-            result, selected_contact_index, visible_start = Functions.handle_input(key, selected_contact_index,
-                                                                                   visible_start, visible_rows,
-                                                                                   len(contacts))
+            result, selected_contact_index, visible_start = CLIFunctions.handle_input(key, selected_contact_index,
+                                                                                      visible_start, visible_rows,
+                                                                                      len(contacts))
 
             if result == "exit":
                 break
@@ -438,7 +438,7 @@ class Functions:
                     address_book.removed_contacts.pop(selected_contact_index)
 
                     # Confirmation message
-                    Functions.display_info("Contact restored successfully.")
+                    CLIFunctions.display_info("Contact restored successfully.")
 
                     selected_contact_index = max(0,
                                                  selected_contact_index - 1)
@@ -467,7 +467,7 @@ class Functions:
 
         while True:
             # Print exit options
-            Functions.display_options(exit_window, exit_options, 2, 2, selected_option)
+            CLIFunctions.display_options(exit_window, exit_options, 2, 2, selected_option)
 
             exit_window.refresh()
             key = exit_window.getch()

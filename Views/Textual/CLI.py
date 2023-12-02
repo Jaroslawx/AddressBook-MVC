@@ -1,7 +1,7 @@
 from utils.Log import logger
 from Controllers.FileController import FileController
 from Models.Trivia import trivia
-from Views.Textual.Functions import Functions
+from Views.Textual.CLIFunctions import CLIFunctions
 
 import curses
 import threading
@@ -56,7 +56,7 @@ class CLI:
         # Waiting for Enter
         while True:
             # Print start menu options
-            Functions.display_options(self.stdscr, start_options, y, x, selected_option)
+            CLIFunctions.display_options(self.stdscr, start_options, y, x, selected_option)
 
             self.stdscr.refresh()
             key = self.stdscr.getch()
@@ -115,7 +115,7 @@ class CLI:
             menu_window.border(0)
 
             # Print menu options
-            Functions.display_options(menu_window, menu_options, 3, 2, selected_option)
+            CLIFunctions.display_options(menu_window, menu_options, 3, 2, selected_option)
 
             key = menu_window.getch()
             menu_window.border(0)
@@ -131,35 +131,35 @@ class CLI:
 
                 if selected_option == 0:
                     # Handle the selected "Add contact" option
-                    Functions.display_add_contact(self.stdscr)
+                    CLIFunctions.display_add_contact(self.stdscr)
 
                 elif selected_option == 1:
                     # Handle the selected "Remove contact" option
-                    Functions.display_remove_contact(self.stdscr)
+                    CLIFunctions.display_remove_contact(self.stdscr)
                     pass
                 elif selected_option == 2:
                     # Handle the selected "Display contacts" option
-                    Functions.display_contacts(self.stdscr)
+                    CLIFunctions.display_contacts(self.stdscr)
 
                 elif selected_option == 3:
                     # Handle the selected "Sort contacts" option
-                    Functions.display_sort_contacts(self.stdscr)
+                    CLIFunctions.display_sort_contacts(self.stdscr)
 
                 elif selected_option == 4:
                     # Handle the selected "Edit contact" option
-                    Functions.display_edit_contact(self.stdscr)
+                    CLIFunctions.display_edit_contact(self.stdscr)
 
                 elif selected_option == 5:
                     # Handle the selected "Clear contacts" option
-                    Functions.clear_contacts_list()
+                    CLIFunctions.clear_contacts_list()
 
                 elif selected_option == 6:
                     # Handle the selected "Recycle bin" option
-                    Functions.display_recycle_bin(self.stdscr)
+                    CLIFunctions.display_recycle_bin(self.stdscr)
 
                 elif selected_option == 7:
                     # Handle the selected "Exit" option
-                    Functions.display_exit(self.stdscr)
+                    CLIFunctions.display_exit(self.stdscr)
 
     def start_tui(self):
         logger.log_info("Application started in textual mode")
