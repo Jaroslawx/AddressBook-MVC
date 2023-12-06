@@ -17,6 +17,12 @@ class ContactController:
         logger.log_info(f"Contact deleted from the list and added to the recycle bin.")
 
     @staticmethod
+    def restore_contact(index):
+        address_book.contacts.append(address_book.removed_contacts[index])
+        address_book.removed_contacts.pop(index)
+        logger.log_info(f"Contact restored from the recycle bin.")
+
+    @staticmethod
     def sort_contacts(option, reverse_flag):
         def sorting_key(contact):  # returns the value of the attribute to be sorted
             return getattr(contact, option)

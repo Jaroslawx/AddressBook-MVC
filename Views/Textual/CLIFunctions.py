@@ -434,8 +434,7 @@ class CLIFunctions:
                 # Restore the selected contact
                 if 0 <= selected_contact_index < len(contacts):
                     # Restore the contact to the address book
-                    address_book.contacts.append(address_book.removed_contacts[selected_contact_index])
-                    address_book.removed_contacts.pop(selected_contact_index)
+                    ContactController.restore_contact(selected_contact_index)
 
                     # Confirmation message
                     CLIFunctions.display_info("Contact restored successfully.")
