@@ -3,7 +3,7 @@ from Models.AddressBook import address_book
 from Controllers.ContactController import ContactController
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import sys
 
 
@@ -101,8 +101,55 @@ class GUIFunctions:
         subwin.destroy()
 
     def remove_contact(self):
-        # Handle removing a contact
-        pass
+        def remove_selected_contact():
+            selected_index = contacts_listbox.curselection()
+            if selected_index:
+                # Confirm removal
+                confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
+                if confirmation:
+                    # Remove the contact from the address book
+                    ContactController.remove_contact(selected_index[0])
+                    # Update the contacts listbox
+                    update_contacts_listbox()
+                    messagebox.showinfo("Success", "Contact removed successfully.")
+            else:
+                messagebox.showwarning("Warning", "Please select a contact to remove.")
+
+        def update_contacts_listbox():
+            # Clear the current contents of the listbox
+            contacts_listbox.delete(0, tk.END)
+            # Populate the Listbox with contact names
+            for contact in address_book.contacts:
+                contacts_listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
+                                                f"{contact.email}")
+
+        # Display a Toplevel window to show the list of contacts
+        remove_window = tk.Toplevel(self.root)
+        remove_window.title("Remove Contact")
+        remove_window.geometry("500x400")
+
+        # Create a Listbox to display contacts
+        contacts_listbox = tk.Listbox(remove_window, selectmode=tk.SINGLE, width=90, height=20)
+        contacts_listbox.pack(padx=10, pady=10)
+
+        # Populate the Listbox with contact names
+        for contact in address_book.contacts:
+            contacts_listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
+                                            f"{contact.email}")
+
+        # Add a button to remove the selected contact
+        remove_button = tk.Button(remove_window, text="Remove Selected Contact", command=remove_selected_contact)
+        remove_button.pack(pady=10)
+
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(remove_window, text="Exit", command=remove_window.destroy)
+        exit_button.pack(pady=10)
+
+        # Center the window on the screen
+        self.center_window(remove_window)
+
+        # Start the main loop for the Toplevel window
+        remove_window.mainloop()
 
     def display_contacts(self):
         contacts_window = tk.Toplevel(self.root)
