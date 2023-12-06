@@ -12,15 +12,15 @@ import datetime
 
 class GUI:
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.geometry("1000x700")
-        self.root.config(bg="green")
-        self.root.resizable(False, False)
-        self.root.title("Address Book")
+        self.master = tk.Tk()
+        self.master.geometry("1000x700")
+        self.master.config(bg="green")
+        self.master.resizable(False, False)
+        self.master.title("Address Book")
 
         # Create menu bar
-        menubar = tk.Menu(self.root)
-        self.root.config(menu=menubar)
+        menubar = tk.Menu(self.master)
+        self.master.config(menu=menubar)
 
         # Create menu "File"
         file_menu = tk.Menu(menubar, tearoff=0)
@@ -30,14 +30,50 @@ class GUI:
         file_menu.add_command(label="Load contacts from", command=FileController.load_contacts_and_add)
         file_menu.add_command(label="Save contacts to", command=FileController.save_contacts_to_file)
 
+        # Create a frame for date display
+        date_frame = tk.Frame(self.master, bg="green")
+        date_frame.pack(side=tk.RIGHT, anchor=tk.NE, padx=10, pady=10)
+
+        # Label for displaying date
+        self.date_label = tk.Label(date_frame, text="", font=("Helvetica", 12), bg="green", fg="white")
+        self.date_label.pack()
+
+        # Create buttons
+        button_frame = tk.Frame(self.master, bg="green")
+        button_frame.pack(anchor=tk.NW, padx=5, pady=5)
+
         buttons = ["Add contact", "Remove contact", "Display contacts", "Sort contacts",
                    "Edit contact", "Clear contacts", "Recycle bin", "Exit"]
 
-        # Create buttons
         for button_label in buttons:
-            button = tk.Button(self.root, text=button_label,
-                               command=lambda label=button_label: self.button_handler(label))
-            button.pack(pady=5)
+            button = tk.Button(button_frame, text=button_label,
+                               command=lambda label=button_label: self.button_handler(label), width=20, height=2)
+            button.pack(side=tk.TOP, pady=5)
+
+        # Display date
+        self.update_date()
+
+        # Create a frame for displaying a random fact
+        fact_frame = tk.Frame(self.master, bg="green")
+        fact_frame.pack(side=tk.BOTTOM, anchor=tk.SW, padx=10, pady=10)
+
+        # Label for displaying a random fact
+        self.fact_label = tk.Label(fact_frame, text="", font=("Helvetica", 12), bg="green", fg="white", wraplength=400)
+        self.fact_label.pack()
+
+        # Display a random fact
+        self.update_random_fact()
+
+    def update_date(self):
+        # Update the date label
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.date_label.config(text=f"Date: {current_date}")
+        self.master.after(1000, self.update_date)  # Schedule the next update after 1000 milliseconds (1 second)
+
+    def update_random_fact(self):
+        # Update the fact label with a random fact
+        random_fact = trivia.get_random_trivia()
+        self.fact_label.config(text=f"{random_fact}")
 
     @staticmethod
     def button_handler(label):
@@ -58,8 +94,8 @@ class GUI:
 
     def start_gui(self):
         # Start main GUI loop
-        self.root.mainloop()
+        self.master.mainloop()
 
 
 graphical_view = GUI()
-gui_functions = GUIFunctions(graphical_view.root)
+gui_functions = GUIFunctions(graphical_view.master)
