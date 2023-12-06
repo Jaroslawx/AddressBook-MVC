@@ -11,6 +11,55 @@ class GUIFunctions:
     def __init__(self, master):
         self.root = master
 
+    @staticmethod
+    def tree_contacts(window, contact_list):
+        # Create Treeview widget
+        tree = ttk.Treeview(window)
+        tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
+
+        # Define column headings
+        tree.heading("#0", text="")
+        tree.column("#0", anchor=tk.W, width=0)
+
+        tree.heading("First Name", text="First Name")
+        tree.column("First Name", anchor=tk.W, width=100)
+
+        tree.heading("Last Name", text="Last Name")
+        tree.column("Last Name", anchor=tk.W, width=100)
+
+        tree.heading("Phone Number", text="Phone Number")
+        tree.column("Phone Number", anchor=tk.W, width=120)
+
+        tree.heading("Email", text="Email")
+        tree.column("Email", anchor=tk.W, width=150)
+
+        # Insert actual data from the AddressBook
+        for i, contact in enumerate(contact_list, 1):
+            tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                           contact.phone_number, contact.email))
+
+        # Configure scrollbar
+        scrollbar = ttk.Scrollbar(window, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+
+        # Pack the Treeview widget
+        tree.pack(expand=True, fill="both")
+
+    @staticmethod
+    def center_window(window):
+        # Set the position of the window to the center of the screen
+        window.update_idletasks()
+
+        width = window.winfo_width()
+        height = window.winfo_height()
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+
+        window.geometry(f"{width}x{height}+{x}+{y}")
+
     def add_contact(self):
         # Handle adding a contact
         subwindow = tk.Toplevel(self.root)
@@ -56,54 +105,13 @@ class GUIFunctions:
         pass
 
     def display_contacts(self):
-        # Handle displaying contacts
-        self.display_contacts_window()
-
-    def display_contacts_window(self):
         contacts_window = tk.Toplevel(self.root)
         contacts_window.title("Display Contacts")
         contacts_window.geometry("700x600")
 
-        # Create Treeview widget
-        tree = ttk.Treeview(contacts_window)
-        tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
+        GUIFunctions.tree_contacts(contacts_window, address_book.contacts)
 
-        # Define column headings
-        tree.heading("#0", text="")
-        tree.column("#0", anchor=tk.W, width=0)
-
-        tree.heading("First Name", text="First Name")
-        tree.column("First Name", anchor=tk.W, width=100)
-
-        tree.heading("Last Name", text="Last Name")
-        tree.column("Last Name", anchor=tk.W, width=100)
-
-        tree.heading("Phone Number", text="Phone Number")
-        tree.column("Phone Number", anchor=tk.W, width=120)
-
-        tree.heading("Email", text="Email")
-        tree.column("Email", anchor=tk.W, width=150)
-
-        # Insert actual data from the AddressBook
-        for i, contact in enumerate(address_book.contacts, 1):
-            tree.insert("", "end", values=(contact.first_name, contact.last_name,
-                                           contact.phone_number, contact.email))
-
-        # Add scrollbar
-        scrollbar = ttk.Scrollbar(contacts_window, orient="vertical", command=tree.yview)
-        tree.configure(yscroll=scrollbar.set)
-        scrollbar.pack(side="right", fill="y")
-
-        # Pack the Treeview widget
-        tree.pack(expand=True, fill="both")
-
-        # Center the window on the screen
-        contacts_window.update_idletasks()
-        width = contacts_window.winfo_width()
-        height = contacts_window.winfo_height()
-        x = contacts_window.winfo_screenwidth() - width
-        y = 0
-        contacts_window.geometry(f"{width}x{height}+{x}+{y}")
+        GUIFunctions.center_window(contacts_window)
 
     def sort_contacts(self):
         # Handle sorting contacts
@@ -119,7 +127,13 @@ class GUIFunctions:
 
     def recycle_bin(self):
         # Handle the recycle bin
-        pass
+        recycle_bin_window = tk.Toplevel(self.root)
+        recycle_bin_window.title("Display Contacts")
+        recycle_bin_window.geometry("700x500")
+
+        GUIFunctions.tree_contacts(recycle_bin_window, address_book.removed_contacts)
+
+        GUIFunctions.center_window(recycle_bin_window)
 
     def exit_program(self):
         # Handle exiting the program

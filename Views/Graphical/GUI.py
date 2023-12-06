@@ -72,6 +72,8 @@ class GUI:
         # Display a random fact
         self.update_random_fact()
 
+        GUIFunctions.center_window(self.master)
+
     def update_date(self):
         # Update the date label
         current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -104,6 +106,7 @@ class GUI:
         button_mapping.get(label.lower().replace(" ", "_"), lambda: None)()
 
     def start_gui(self):
+        logger.log_info("Starting GUI...")
         # Start main GUI loop
         self.master.mainloop()
 
