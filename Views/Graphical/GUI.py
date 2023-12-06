@@ -30,6 +30,14 @@ class GUI:
         file_menu.add_command(label="Load contacts from", command=FileController.load_contacts_and_add)
         file_menu.add_command(label="Save contacts to", command=FileController.save_contacts_to_file)
 
+        # # Create menu "View"
+        # file_menu = tk.Menu(menubar, tearoff=0)
+        # menubar.add_cascade(label="View", menu=file_menu)
+        #
+        # # Add options to menu "File"
+        # file_menu.add_command(label="Hide date", command=FileController.load_contacts_and_add)
+        # file_menu.add_command(label="Hide trivia", command=FileController.save_contacts_to_file)
+
         # Create a frame for date display
         date_frame = tk.Frame(self.master, bg="green")
         date_frame.pack(side=tk.RIGHT, anchor=tk.NE, padx=10, pady=10)
@@ -58,7 +66,7 @@ class GUI:
         fact_frame.pack(side=tk.BOTTOM, anchor=tk.SW, padx=10, pady=10)
 
         # Label for displaying a random fact
-        self.fact_label = tk.Label(fact_frame, text="", font=("Helvetica", 12), bg="green", fg="white", wraplength=400)
+        self.fact_label = tk.Label(fact_frame, text="", font=("Helvetica", 12), bg="green", fg="white", wraplength=600)
         self.fact_label.pack()
 
         # Display a random fact
@@ -74,6 +82,9 @@ class GUI:
         # Update the fact label with a random fact
         random_fact = trivia.get_random_trivia()
         self.fact_label.config(text=f"{random_fact}")
+
+        # Schedule the next update after 10 seconds
+        self.master.after(10000, self.update_random_fact)
 
     @staticmethod
     def button_handler(label):

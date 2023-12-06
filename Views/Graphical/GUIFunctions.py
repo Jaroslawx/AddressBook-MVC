@@ -1,6 +1,9 @@
+from utils.Log import logger
+from Models.AddressBook import address_book
 from Controllers.ContactController import ContactController
 
 import tkinter as tk
+from tkinter import ttk
 import sys
 
 
@@ -39,7 +42,8 @@ class GUIFunctions:
             subwindow, first_name_entry.get(), last_name_entry.get(), phone_number_entry.get(), email_entry.get()))
         add_button.grid(row=4, columnspan=2, pady=10)
 
-    def confirm_add_contact(self, subwin, first_name, last_name, phone_number, email):
+    @staticmethod
+    def confirm_add_contact(subwin, first_name, last_name, phone_number, email):
         # Handle confirming the addition of a contact
         ContactController.create_contact_and_add(
             first_name, last_name, phone_number, email)
@@ -53,7 +57,53 @@ class GUIFunctions:
 
     def display_contacts(self):
         # Handle displaying contacts
-        pass
+        self.display_contacts_window()
+
+    def display_contacts_window(self):
+        contacts_window = tk.Toplevel(self.root)
+        contacts_window.title("Display Contacts")
+        contacts_window.geometry("700x600")
+
+        # Create Treeview widget
+        tree = ttk.Treeview(contacts_window)
+        tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
+
+        # Define column headings
+        tree.heading("#0", text="")
+        tree.column("#0", anchor=tk.W, width=0)
+
+        tree.heading("First Name", text="First Name")
+        tree.column("First Name", anchor=tk.W, width=100)
+
+        tree.heading("Last Name", text="Last Name")
+        tree.column("Last Name", anchor=tk.W, width=100)
+
+        tree.heading("Phone Number", text="Phone Number")
+        tree.column("Phone Number", anchor=tk.W, width=120)
+
+        tree.heading("Email", text="Email")
+        tree.column("Email", anchor=tk.W, width=150)
+
+        # Insert actual data from the AddressBook
+        for i, contact in enumerate(address_book.contacts, 1):
+            tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                           contact.phone_number, contact.email))
+
+        # Add scrollbar
+        scrollbar = ttk.Scrollbar(contacts_window, orient="vertical", command=tree.yview)
+        tree.configure(yscroll=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+
+        # Pack the Treeview widget
+        tree.pack(expand=True, fill="both")
+
+        # Center the window on the screen
+        contacts_window.update_idletasks()
+        width = contacts_window.winfo_width()
+        height = contacts_window.winfo_height()
+        x = contacts_window.winfo_screenwidth() - width
+        y = 0
+        contacts_window.geometry(f"{width}x{height}+{x}+{y}")
 
     def sort_contacts(self):
         # Handle sorting contacts
