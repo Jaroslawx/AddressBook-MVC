@@ -138,12 +138,12 @@ class GUIFunctions:
                                             f"{contact.email}")
 
         # Add a button to remove the selected contact
-        remove_button = tk.Button(remove_window, text="Remove Selected Contact", command=remove_selected_contact)
-        remove_button.pack(pady=10)
+        remove_button = tk.Button(remove_window, text="Remove Contact", command=remove_selected_contact)
+        remove_button.pack(side=tk.LEFT, padx=5, pady=10)
 
         # Add a button to exit the loop and close the window
         exit_button = tk.Button(remove_window, text="Exit", command=remove_window.destroy)
-        exit_button.pack(pady=10)
+        exit_button.pack(side=tk.LEFT, padx=5, pady=10)
 
         # Center the window on the screen
         self.center_window(remove_window)
@@ -173,14 +173,57 @@ class GUIFunctions:
         pass
 
     def recycle_bin(self):
-        # Handle the recycle bin
-        recycle_bin_window = tk.Toplevel(self.root)
-        recycle_bin_window.title("Display Contacts")
-        recycle_bin_window.geometry("700x500")
+        # Function to handle restoring a contact from the recycle bin
+        def restore_selected_contact():
+            selected_index = listbox.curselection()
+            if selected_index:
+                # Confirm restoration
+                confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to restore this contact?")
+                if confirmation:
+                    # Restore the contact to the main address book
+                    ContactController.restore_contact(selected_index[0])
+                    # Update the recycle bin
+                    update_recycle_bin()
+                    messagebox.showinfo("Success", "Contact restored successfully.")
+            else:
+                messagebox.showwarning("Warning", "Please select a contact to restore.")
 
-        GUIFunctions.tree_contacts(recycle_bin_window, address_book.removed_contacts)
+        # Function to update the recycle bin after restoring a contact
+        def update_recycle_bin():
+            # Clear the current contents of the Listbox
+            listbox.delete(0, tk.END)
 
-        GUIFunctions.center_window(recycle_bin_window)
+            # Populate the Listbox with contact names
+            for contact in address_book.removed_contacts:
+                listbox.insert(tk.END,
+                    f"{contact.first_name} {contact.last_name} {contact.phone_number} {contact.email}")
+
+        # Display a Toplevel window to show the list of contacts
+        restore_window = tk.Toplevel(self.root)
+        restore_window.title("Recycle Bin")
+        restore_window.geometry("500x400")
+
+        # Create Listbox widget for the recycle bin
+        listbox = tk.Listbox(restore_window, selectmode=tk.SINGLE, width=90, height=20)
+        listbox.pack(padx=10, pady=10)
+
+        # Populate the Listbox with contact names from the removed contacts
+        for contact in address_book.removed_contacts:
+            listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} {contact.email}")
+
+        # Add a button to remove the selected contact
+        restore_button = tk.Button(restore_window, text="Restore Contact", command=restore_selected_contact)
+        restore_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(restore_window, text="Exit", command=restore_window.destroy)
+        exit_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        # Center the window on the screen
+        GUIFunctions.center_window(restore_window)
+
+        # Start the main loop for the Toplevel window
+        restore_window.mainloop()
 
     def exit_program(self):
         # Handle exiting the program
