@@ -260,7 +260,7 @@ class CLIFunctions:
         # Menu options
         sort_options = ["1. Name", "2. Surname", "3. Number", "4. Email"]
         selected_option = 0
-        temp0, temp1, temp2, temp3 = 0, 0, 0, 0
+        temp_name, temp_surname, temp_number, temp_email = 0, 0, 0, 0
 
         while True:
             stdscr.clear()
@@ -284,20 +284,20 @@ class CLIFunctions:
 
             elif key == 10:  # Enter
                 if selected_option == 0:
-                    ContactController.sort_contacts("first_name", temp0 == 1)
-                    temp0 = 1 - temp0
+                    ContactController.sort_contacts("first_name", temp_name == 1)
+                    temp_name = 1 - temp_name
 
                 elif selected_option == 1:
-                    ContactController.sort_contacts("last_name", temp1 == 1)
-                    temp1 = 1 - temp1
+                    ContactController.sort_contacts("last_name", temp_surname == 1)
+                    temp_surname = 1 - temp_surname
 
                 elif selected_option == 2:
-                    ContactController.sort_contacts("phone_number", temp2 == 1)
-                    temp2 = 1 - temp2
+                    ContactController.sort_contacts("phone_number", temp_number == 1)
+                    temp_number = 1 - temp_number
 
                 elif selected_option == 3:
-                    ContactController.sort_contacts("email", temp3 == 1)
-                    temp3 = 1 - temp3
+                    ContactController.sort_contacts("email", temp_email == 1)
+                    temp_email = 1 - temp_email
 
                 CLIFunctions.display_contacts(stdscr)
 
