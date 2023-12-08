@@ -9,6 +9,7 @@ import sys
 
 class GUIFunctions:
     def __init__(self, master):
+        self.temp_name = None
         self.root = master
 
     @staticmethod
@@ -161,16 +162,147 @@ class GUIFunctions:
         GUIFunctions.center_window(contacts_window)
 
     def sort_contacts(self):
-        # Handle sorting contacts
-        pass
+        # Display a Toplevel window for sorting contacts
+        sort_window = tk.Toplevel(self.root)
+        sort_window.title("Sort Contacts")
+        sort_window.geometry("300x200")
+
+        # Function to handle sorting contacts
+        def sort_contacts(option, reverse_flag):
+            ContactController.sort_contacts(option, reverse_flag)
+            messagebox.showinfo("Success",
+                                f"Contacts sorted by {label_mapping[option]} in "
+                                f"{'descending' if reverse_flag else 'ascending'} order.")
+            GUIFunctions.display_contacts(self)
+
+        # Create labels and buttons for sorting
+        sort_labels = ["Name", "Surname", "Number", "Email"]
+        pattern = ["first_name", "last_name", "phone_number", "email"]
+
+        # Mapping option to label
+        label_mapping = {"first_name": "Name", "last_name": "Surname", "phone_number": "Number", "email": "Email"}
+
+        for label, option in zip(sort_labels, pattern):
+            label_frame = tk.Frame(sort_window)
+            label_frame.pack(pady=5)
+
+            label_text = tk.Label(label_frame, text=f"By {label}")
+            label_text.pack(side=tk.LEFT)
+
+            asc_button = tk.Button(label_frame, text="Ascending", command=lambda l=option: sort_contacts(l, False))
+            asc_button.pack(side=tk.LEFT, padx=5)
+
+            desc_button = tk.Button(label_frame, text="Descending", command=lambda l=option: sort_contacts(l, True))
+            desc_button.pack(side=tk.LEFT)
+
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(sort_window, text="Exit", command=sort_window.destroy)
+        exit_button.pack(pady=10)
+
+        # Center the window on the screen
+        GUIFunctions.center_window(sort_window)
+
+        # Start the main loop for the Toplevel window
+        sort_window.mainloop()
 
     def edit_contact(self):
         # Handle editing a contact
-        pass
+        # Display a Toplevel window to show the list of contacts
+        edit_window = tk.Toplevel(self.root)
+        edit_window.title("Edit Contact")
+        edit_window.geometry("500x400")
 
-    def clear_contacts(self):
+        # Create a Listbox to display contacts
+        contacts_listbox = tk.Listbox(edit_window, selectmode=tk.SINGLE, width=90, height=20)
+        contacts_listbox.pack(padx=10, pady=10)
+
+        # Populate the Listbox with contact names
+        for contact in address_book.contacts:
+            contacts_listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
+                                            f"{contact.email}")
+
+        # Function to handle editing a contact
+        def edit_selected_contact():
+            selected_index = contacts_listbox.curselection()
+            if selected_index:
+                # Get the selected contact
+                selected_contact = address_book.contacts[selected_index[0]]
+
+                # Create a Toplevel window for editing
+                edit_contact_window = tk.Toplevel(edit_window)
+                edit_contact_window.title("Edit Contact")
+
+                # Display the old and new values
+                tk.Label(edit_contact_window, text="Old Value:").grid(row=0, column=0)
+                tk.Label(edit_contact_window, text="New Value:").grid(row=0, column=1)
+
+                # Display old values
+                tk.Label(edit_contact_window, text=f"First Name: {selected_contact.first_name}").grid(row=1, column=0)
+                tk.Label(edit_contact_window, text=f"Last Name: {selected_contact.last_name}").grid(row=2, column=0)
+                tk.Label(edit_contact_window, text=f"Phone Number: {selected_contact.phone_number}").grid(row=3,
+                                                                                                          column=0)
+                tk.Label(edit_contact_window, text=f"Email: {selected_contact.email}").grid(row=4, column=0)
+
+                # Entry widgets for new values
+                new_first_name_entry = tk.Entry(edit_contact_window)
+                new_last_name_entry = tk.Entry(edit_contact_window)
+                new_phone_number_entry = tk.Entry(edit_contact_window)
+                new_email_entry = tk.Entry(edit_contact_window)
+
+                new_first_name_entry.grid(row=1, column=1)
+                new_last_name_entry.grid(row=2, column=1)
+                new_phone_number_entry.grid(row=3, column=1)
+                new_email_entry.grid(row=4, column=1)
+
+                # Function to handle updating the contact
+                def update_contact():
+                    # Get new values
+                    new_first_name = new_first_name_entry.get()
+                    new_last_name = new_last_name_entry.get()
+                    new_phone_number = new_phone_number_entry.get()
+                    new_email = new_email_entry.get()
+
+                    # Update the contact
+                    selected_contact.first_name = new_first_name if new_first_name else selected_contact.first_name
+                    selected_contact.last_name = new_last_name if new_last_name else selected_contact.last_name
+                    selected_contact.phone_number = new_phone_number if new_phone_number else selected_contact.phone_number
+                    selected_contact.email = new_email if new_email else selected_contact.email
+
+                    # Update the Listbox
+                    contacts_listbox.delete(selected_index[0])
+                    contacts_listbox.insert(selected_index[0], f"{selected_contact.first_name} "
+                                                               f"{selected_contact.last_name} "
+                                                               f"{selected_contact.phone_number} "
+                                                               f"{selected_contact.email}")
+
+                    messagebox.showinfo("Success", "Contact updated successfully.")
+                    edit_contact_window.destroy()
+
+                # Add a button to update the contact
+                update_button = tk.Button(edit_contact_window, text="Update Contact", command=update_contact)
+                update_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+            else:
+                messagebox.showwarning("Warning", "Please select a contact to edit.")
+
+        # Add a button to edit the selected contact
+        edit_button = tk.Button(edit_window, text="Edit Selected Contact", command=edit_selected_contact)
+        edit_button.pack(pady=10)
+
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(edit_window, text="Exit", command=edit_window.destroy)
+        exit_button.pack(pady=10)
+
+        # Center the window on the screen
+        GUIFunctions.center_window(edit_window)
+
+        # Start the main loop for the Toplevel window
+        edit_window.mainloop()
+
+    @staticmethod
+    def clear_contacts():
         # Handle clearing contacts
-        pass
+        ContactController.clear_contacts()
 
     def recycle_bin(self):
         # Function to handle restoring a contact from the recycle bin
