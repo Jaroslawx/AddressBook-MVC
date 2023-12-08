@@ -23,12 +23,12 @@ class ContactController:
         logger.log_info(f"Contact restored from the recycle bin.")
 
     @staticmethod
-    def sort_contacts(option, reverse_flag):
+    def sort_contacts(attribute, reverse_flag):
         def sorting_key(contact):  # returns the value of the attribute to be sorted
-            return getattr(contact, option)
+            return getattr(contact, attribute)
 
         address_book.contacts.sort(key=sorting_key, reverse=reverse_flag)
-        logger.log_info(f"Contacts sorted by {option} in {'descending' if reverse_flag else 'ascending'} order.")
+        logger.log_info(f"Contacts sorted by {attribute} in {'descending' if reverse_flag else 'ascending'} order.")
 
     @staticmethod
     def clear_contacts():

@@ -1,12 +1,9 @@
 from utils.Log import logger
 from Controllers.FileController import FileController
 from Models.Trivia import trivia
-from Models.AddressBook import address_book
 from Views.Graphical.GUIFunctions import GUIFunctions
 
 import tkinter as tk
-import threading
-import time
 import datetime
 
 
@@ -30,21 +27,13 @@ class GUI:
         file_menu.add_command(label="Load contacts from", command=FileController.load_contacts_and_add)
         file_menu.add_command(label="Save contacts to", command=FileController.save_contacts_to_file)
 
-        # # Create menu "View"
-        # file_menu = tk.Menu(menubar, tearoff=0)
-        # menubar.add_cascade(label="View", menu=file_menu)
-        #
-        # # Add options to menu "File"
-        # file_menu.add_command(label="Hide date", command=FileController.load_contacts_and_add)
-        # file_menu.add_command(label="Hide trivia", command=FileController.save_contacts_to_file)
-
-        # Create a frame for date display
-        date_frame = tk.Frame(self.master, bg="green")
-        date_frame.pack(side=tk.RIGHT, anchor=tk.NE, padx=10, pady=10)
+        # Create menu "View"
+        view_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="View", menu=view_menu)
 
         # Label for displaying date
-        self.date_label = tk.Label(date_frame, text="", font=("Helvetica", 12), bg="green", fg="white")
-        self.date_label.pack()
+        self.date_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="green", fg="white")
+        self.date_label.pack(side=tk.RIGHT, anchor=tk.NE, padx=10, pady=10)
 
         # Create buttons
         button_frame = tk.Frame(self.master, bg="green")
@@ -61,13 +50,9 @@ class GUI:
         # Display date
         self.update_date()
 
-        # Create a frame for displaying a random fact
-        fact_frame = tk.Frame(self.master, bg="green")
-        fact_frame.pack(side=tk.BOTTOM, anchor=tk.SW, padx=10, pady=10)
-
         # Label for displaying a random fact
-        self.fact_label = tk.Label(fact_frame, text="", font=("Helvetica", 12), bg="green", fg="white", wraplength=600)
-        self.fact_label.pack()
+        self.fact_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="green", fg="black", wraplength=600)
+        self.fact_label.pack(side=tk.BOTTOM, anchor=tk.S, padx=10, pady=10)
 
         # Display a random fact
         self.update_random_fact()

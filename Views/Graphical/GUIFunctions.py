@@ -14,6 +14,7 @@ class GUIFunctions:
 
     @staticmethod
     def tree_contacts(window, contact_list):
+        logger.log_info("Displaying contacts in a Treeview widget.")
         # Create Treeview widget
         tree = ttk.Treeview(window)
         tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
@@ -49,6 +50,7 @@ class GUIFunctions:
 
     @staticmethod
     def center_window(window):
+        logger.log_info("Centering window on screen.")
         # Set the position of the window to the center of the screen
         window.update_idletasks()
 
@@ -61,7 +63,31 @@ class GUIFunctions:
 
         window.geometry(f"{width}x{height}+{x}+{y}")
 
+    def create_contacts_listbox(self, name="Window"):
+        # Display a Toplevel window to show the list of contacts
+        window = tk.Toplevel(self.root)
+        window.title(name)
+        window.geometry("500x400")
+
+        # Create a Listbox to display contacts
+        listbox = tk.Listbox(window, selectmode=tk.SINGLE, width=90, height=20)
+        listbox.pack(padx=10, pady=10)
+
+        # Populate the Listbox with contact names
+        for contact in address_book.contacts:
+            listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
+                                   f"{contact.email}")
+
+        return window, listbox
+
+    @staticmethod
+    def create_exit_button(window, side=tk.LEFT, x=10, y=10):
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(window, text="Exit", command=window.destroy)
+        exit_button.pack(side=side, padx=x, pady=y)
+
     def add_contact(self):
+        logger.log_info("Adding a contact.")
         # Handle adding a contact
         subwindow = tk.Toplevel(self.root)
         subwindow.title("Add Contact")
@@ -102,6 +128,11 @@ class GUIFunctions:
         subwin.destroy()
 
     def remove_contact(self):
+        logger.log_info("Removing a contact.")
+
+        # Handle removing a contact
+        remove_window, contacts_listbox = self.create_contacts_listbox("Remove Contact")
+
         def remove_selected_contact():
             selected_index = contacts_listbox.curselection()
             if selected_index:
@@ -120,31 +151,15 @@ class GUIFunctions:
             # Clear the current contents of the listbox
             contacts_listbox.delete(0, tk.END)
             # Populate the Listbox with contact names
-            for contact in address_book.contacts:
-                contacts_listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
-                                                f"{contact.email}")
-
-        # Display a Toplevel window to show the list of contacts
-        remove_window = tk.Toplevel(self.root)
-        remove_window.title("Remove Contact")
-        remove_window.geometry("500x400")
-
-        # Create a Listbox to display contacts
-        contacts_listbox = tk.Listbox(remove_window, selectmode=tk.SINGLE, width=90, height=20)
-        contacts_listbox.pack(padx=10, pady=10)
-
-        # Populate the Listbox with contact names
-        for contact in address_book.contacts:
-            contacts_listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
-                                            f"{contact.email}")
+            for c in address_book.contacts:
+                contacts_listbox.insert(tk.END, f"{c.first_name} {c.last_name} {c.phone_number} "
+                                                f"{c.email}")
 
         # Add a button to remove the selected contact
         remove_button = tk.Button(remove_window, text="Remove Contact", command=remove_selected_contact)
         remove_button.pack(side=tk.LEFT, padx=5, pady=10)
 
-        # Add a button to exit the loop and close the window
-        exit_button = tk.Button(remove_window, text="Exit", command=remove_window.destroy)
-        exit_button.pack(side=tk.LEFT, padx=5, pady=10)
+        self.create_exit_button(remove_window, tk.LEFT, 5, 10)
 
         # Center the window on the screen
         self.center_window(remove_window)
@@ -153,6 +168,8 @@ class GUIFunctions:
         remove_window.mainloop()
 
     def display_contacts(self):
+        logger.log_info("Displaying contacts.")
+        # Handle displaying contacts
         contacts_window = tk.Toplevel(self.root)
         contacts_window.title("Display Contacts")
         contacts_window.geometry("700x600")
@@ -168,17 +185,16 @@ class GUIFunctions:
         sort_window.geometry("300x200")
 
         # Function to handle sorting contacts
-        def sort_contacts(option, reverse_flag):
-            ContactController.sort_contacts(option, reverse_flag)
+        def temp_sort(heading, reverse_flag):
+            ContactController.sort_contacts(heading, reverse_flag)
             messagebox.showinfo("Success",
-                                f"Contacts sorted by {label_mapping[option]} in "
+                                f"Contacts sorted by {label_mapping[heading]} in "
                                 f"{'descending' if reverse_flag else 'ascending'} order.")
             GUIFunctions.display_contacts(self)
 
         # Create labels and buttons for sorting
         sort_labels = ["Name", "Surname", "Number", "Email"]
         pattern = ["first_name", "last_name", "phone_number", "email"]
-
         # Mapping option to label
         label_mapping = {"first_name": "Name", "last_name": "Surname", "phone_number": "Number", "email": "Email"}
 
@@ -189,10 +205,10 @@ class GUIFunctions:
             label_text = tk.Label(label_frame, text=f"By {label}")
             label_text.pack(side=tk.LEFT)
 
-            asc_button = tk.Button(label_frame, text="Ascending", command=lambda l=option: sort_contacts(l, False))
+            asc_button = tk.Button(label_frame, text="Ascending", command=lambda opt=option: temp_sort(opt, False))
             asc_button.pack(side=tk.LEFT, padx=5)
 
-            desc_button = tk.Button(label_frame, text="Descending", command=lambda l=option: sort_contacts(l, True))
+            desc_button = tk.Button(label_frame, text="Descending", command=lambda opt=option: temp_sort(opt, True))
             desc_button.pack(side=tk.LEFT)
 
         # Add a button to exit the loop and close the window
@@ -206,20 +222,10 @@ class GUIFunctions:
         sort_window.mainloop()
 
     def edit_contact(self):
+        logger.log_info("Editing a contact.")
+
         # Handle editing a contact
-        # Display a Toplevel window to show the list of contacts
-        edit_window = tk.Toplevel(self.root)
-        edit_window.title("Edit Contact")
-        edit_window.geometry("500x400")
-
-        # Create a Listbox to display contacts
-        contacts_listbox = tk.Listbox(edit_window, selectmode=tk.SINGLE, width=90, height=20)
-        contacts_listbox.pack(padx=10, pady=10)
-
-        # Populate the Listbox with contact names
-        for contact in address_book.contacts:
-            contacts_listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
-                                            f"{contact.email}")
+        edit_window, contacts_listbox = self.create_contacts_listbox("Edit Contact")
 
         # Function to handle editing a contact
         def edit_selected_contact():
@@ -263,10 +269,14 @@ class GUIFunctions:
                     new_email = new_email_entry.get()
 
                     # Update the contact
-                    selected_contact.first_name = new_first_name if new_first_name else selected_contact.first_name
-                    selected_contact.last_name = new_last_name if new_last_name else selected_contact.last_name
-                    selected_contact.phone_number = new_phone_number if new_phone_number else selected_contact.phone_number
-                    selected_contact.email = new_email if new_email else selected_contact.email
+                    selected_contact.first_name = new_first_name if new_first_name \
+                        else selected_contact.first_name
+                    selected_contact.last_name = new_last_name if new_last_name \
+                        else selected_contact.last_name
+                    selected_contact.phone_number = new_phone_number if new_phone_number \
+                        else selected_contact.phone_number
+                    selected_contact.email = new_email if new_email \
+                        else selected_contact.email
 
                     # Update the Listbox
                     contacts_listbox.delete(selected_index[0])
@@ -301,6 +311,7 @@ class GUIFunctions:
 
     @staticmethod
     def clear_contacts():
+        logger.log_info("Clearing contacts.")
         # Handle clearing contacts
         ContactController.clear_contacts()
 
@@ -326,9 +337,9 @@ class GUIFunctions:
             listbox.delete(0, tk.END)
 
             # Populate the Listbox with contact names
-            for contact in address_book.removed_contacts:
+            for c in address_book.removed_contacts:
                 listbox.insert(tk.END,
-                    f"{contact.first_name} {contact.last_name} {contact.phone_number} {contact.email}")
+                               f"{c.first_name} {c.last_name} {c.phone_number} {c.email}")
 
         # Display a Toplevel window to show the list of contacts
         restore_window = tk.Toplevel(self.root)
@@ -358,6 +369,7 @@ class GUIFunctions:
         restore_window.mainloop()
 
     def exit_program(self):
+        logger.log_info("Exiting the program.")
         # Handle exiting the program
         self.root.destroy()
         sys.exit(0)
