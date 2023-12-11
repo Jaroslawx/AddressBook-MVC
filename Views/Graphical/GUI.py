@@ -11,7 +11,7 @@ class GUI:
     def __init__(self):
         self.master = tk.Tk()
         self.master.geometry("1000x700")
-        self.master.config(bg="green")
+        self.master.config(bg="white")
         self.master.resizable(False, False)
         self.master.title("Address Book")
 
@@ -32,12 +32,12 @@ class GUI:
         menubar.add_cascade(label="View", menu=view_menu)
 
         # Label for displaying date
-        self.date_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="green", fg="white")
-        self.date_label.pack(side=tk.RIGHT, anchor=tk.NE, padx=10, pady=10)
+        self.date_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="white", fg="black")
+        self.date_label.pack(anchor=tk.SW, padx=10, pady=10)
 
         # Create buttons
-        button_frame = tk.Frame(self.master, bg="green")
-        button_frame.pack(anchor=tk.NW, padx=5, pady=5)
+        button_frame = tk.Frame(self.master, bg="white", bd=5, relief=tk.RIDGE)
+        button_frame.pack(anchor=tk.CENTER, padx=5, pady=5)
 
         buttons = ["Add contact", "Remove contact", "Display contacts", "Sort contacts",
                    "Edit contact", "Clear contacts", "Recycle bin", "Exit"]
@@ -51,8 +51,8 @@ class GUI:
         self.update_date()
 
         # Label for displaying a random fact
-        self.fact_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="green", fg="black", wraplength=600)
-        self.fact_label.pack(side=tk.BOTTOM, anchor=tk.S, padx=10, pady=10)
+        self.fact_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="white", fg="black", wraplength=600)
+        self.fact_label.pack(side=tk.BOTTOM, anchor=tk.CENTER, padx=10, pady=10)
 
         # Display a random fact
         self.update_random_fact()
