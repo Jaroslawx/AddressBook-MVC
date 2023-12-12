@@ -15,6 +15,7 @@ class GUI:
         self.master.config(bg="white")
         self.master.resizable(False, False)
         self.master.title("Address Book")
+        self.master.iconbitmap("assets/icon.ico")
 
         # Create menu bar
         menubar = tk.Menu(self.master)
@@ -25,7 +26,7 @@ class GUI:
         menubar.add_cascade(label="File", menu=file_menu)
 
         # Add options to menu "File"
-        file_menu.add_command(label="Load contacts from", command=FileController.load_contacts_and_add)
+        file_menu.add_command(label="Load contacts from", command=self.load_contacts_from_file)
         file_menu.add_command(label="Save contacts to", command=FileController.save_contacts_to_file)
 
         # Label for displaying date
@@ -99,6 +100,13 @@ class GUI:
 
         # Get the corresponding method for the given label and call it
         button_mapping.get(label.lower().replace(" ", "_"), lambda: None)()
+
+        # Update the treeview
+        self.gui_functions.update_treeview()
+
+    def load_contacts_from_file(self):
+        # Load contacts from file
+        FileController.load_contacts_and_add()
 
         # Update the treeview
         self.gui_functions.update_treeview()

@@ -4,7 +4,7 @@ import os
 
 
 class Trivia:
-    def __init__(self, trivia_file="files/trivia.txt"):
+    def __init__(self, trivia_file="assets/files/trivia.txt"):
         self.trivia_file = trivia_file
         self.list_of_trivia = self.load_trivia()
 

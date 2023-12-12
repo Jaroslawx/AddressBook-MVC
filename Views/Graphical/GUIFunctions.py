@@ -404,13 +404,13 @@ class GUIFunctions:
         self.super_tree.column("#0", anchor=tk.W, width=0)
 
         self.super_tree.heading("First Name", text="First Name")
-        self.super_tree.column("First Name", anchor=tk.W, width=100)
+        self.super_tree.column("First Name", anchor=tk.W, width=80)
 
         self.super_tree.heading("Last Name", text="Last Name")
-        self.super_tree.column("Last Name", anchor=tk.W, width=100)
+        self.super_tree.column("Last Name", anchor=tk.W, width=90)
 
         self.super_tree.heading("Phone Number", text="Phone Number")
-        self.super_tree.column("Phone Number", anchor=tk.W, width=120)
+        self.super_tree.column("Phone Number", anchor=tk.W, width=100)
 
         self.super_tree.heading("Email", text="Email")
         self.super_tree.column("Email", anchor=tk.W, width=150)
