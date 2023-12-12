@@ -8,9 +8,10 @@ import sys
 
 
 class GUIFunctions:
-    def __init__(self, master):
-        self.temp_name = None
+    def __init__(self, master, super_table_frame):
         self.root = master
+        self.super_tree = None
+        self.super_table_frame = super_table_frame
 
     @staticmethod
     def tree_contacts(window, contact_list):
@@ -118,11 +119,13 @@ class GUIFunctions:
             add_window, first_name_entry.get(), last_name_entry.get(), phone_number_entry.get(), email_entry.get()))
         add_button.grid(row=4, columnspan=2, pady=10)
 
-    @staticmethod
-    def confirm_add_contact(window, first_name, last_name, phone_number, email):
+    def confirm_add_contact(self, window, first_name, last_name, phone_number, email):
         # Handle confirming the addition of a contact
         ContactController.create_contact_and_add(
             first_name, last_name, phone_number, email)
+
+        # Update the treeview
+        self.update_treeview()
 
         # Close the window after adding the contact
         window.destroy()
@@ -154,6 +157,8 @@ class GUIFunctions:
             for c in address_book.contacts:
                 contacts_listbox.insert(tk.END, f"{c.first_name} {c.last_name} {c.phone_number} "
                                                 f"{c.email}")
+            # Update the treeview
+            self.update_treeview()
 
         # Add a button to remove the selected contact
         remove_button = tk.Button(remove_window, text="Remove Contact", command=remove_selected_contact)
@@ -190,7 +195,9 @@ class GUIFunctions:
             messagebox.showinfo("Success",
                                 f"Contacts sorted by {label_mapping[heading]} in "
                                 f"{'descending' if reverse_flag else 'ascending'} order.")
-            GUIFunctions.display_contacts(self)
+
+            # Update the treeview
+            self.update_treeview()
 
         # Create labels and buttons for sorting
         sort_labels = ["Name", "Surname", "Number", "Email"]
@@ -286,6 +293,10 @@ class GUIFunctions:
                                                                f"{selected_contact.email}")
 
                     messagebox.showinfo("Success", "Contact updated successfully.")
+
+                    # Update the treeview
+                    self.update_treeview()
+
                     edit_contact_window.destroy()
 
                 # Add a button to update the contact
@@ -309,11 +320,13 @@ class GUIFunctions:
         # Start the main loop for the Toplevel window
         edit_window.mainloop()
 
-    @staticmethod
-    def clear_contacts():
+    def clear_contacts(self):
         logger.log_info("Clearing contacts.")
         # Handle clearing contacts
         ContactController.clear_contacts()
+
+        # Update the treeview
+        self.update_treeview()
 
     def recycle_bin(self):
         # Function to handle restoring a contact from the recycle bin
@@ -340,6 +353,9 @@ class GUIFunctions:
             for c in address_book.removed_contacts:
                 listbox.insert(tk.END,
                                f"{c.first_name} {c.last_name} {c.phone_number} {c.email}")
+
+            # Update the treeview
+            self.update_treeview()
 
         # Display a Toplevel window to show the list of contacts
         restore_window = tk.Toplevel(self.root)
@@ -373,3 +389,54 @@ class GUIFunctions:
         # Handle exiting the program
         self.root.destroy()
         sys.exit(0)
+
+    def super_table_display(self):
+        logger.log_info("Displaying contacts.")
+        # Handle displaying contacts
+
+        logger.log_info("Displaying contacts in a Treeview widget.")
+        # Create Treeview widget
+        self.super_tree = ttk.Treeview(self.super_table_frame)
+        self.super_tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
+
+        # Define column headings
+        self.super_tree.heading("#0", text="")
+        self.super_tree.column("#0", anchor=tk.W, width=0)
+
+        self.super_tree.heading("First Name", text="First Name")
+        self.super_tree.column("First Name", anchor=tk.W, width=100)
+
+        self.super_tree.heading("Last Name", text="Last Name")
+        self.super_tree.column("Last Name", anchor=tk.W, width=100)
+
+        self.super_tree.heading("Phone Number", text="Phone Number")
+        self.super_tree.column("Phone Number", anchor=tk.W, width=120)
+
+        self.super_tree.heading("Email", text="Email")
+        self.super_tree.column("Email", anchor=tk.W, width=150)
+
+        # Insert actual data from the AddressBook
+        for i, contact in enumerate(address_book.contacts, 1):
+            self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                      contact.phone_number, contact.email))
+
+        # Configure scrollbar
+        scrollbar = ttk.Scrollbar(self.super_table_frame, orient="vertical", command=self.super_tree.yview)
+        self.super_tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+
+        # Pack the Treeview widget
+        self.super_tree.pack(expand=True, fill="both")
+
+    def update_treeview(self):
+        # Clear tree
+        for item in self.super_tree.get_children():
+            self.super_tree.delete(item)
+
+        # Insert actual data from the AddressBook
+        for i, contact in enumerate(address_book.contacts, 1):
+            self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                      contact.phone_number, contact.email))
+
+        # Update idletasks to refresh the Treeview
+        self.super_tree.update_idletasks()
