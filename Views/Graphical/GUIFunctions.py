@@ -13,41 +13,8 @@ class GUIFunctions:
         self.super_tree = None
         self.super_table_frame = super_table_frame
 
-    @staticmethod
-    def tree_contacts(window, contact_list):
-        logger.log_info("Displaying contacts in a Treeview widget.")
-        # Create Treeview widget
-        tree = ttk.Treeview(window)
-        tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
-
-        # Define column headings
-        tree.heading("#0", text="")
-        tree.column("#0", anchor=tk.W, width=0)
-
-        tree.heading("First Name", text="First Name")
-        tree.column("First Name", anchor=tk.W, width=100)
-
-        tree.heading("Last Name", text="Last Name")
-        tree.column("Last Name", anchor=tk.W, width=100)
-
-        tree.heading("Phone Number", text="Phone Number")
-        tree.column("Phone Number", anchor=tk.W, width=120)
-
-        tree.heading("Email", text="Email")
-        tree.column("Email", anchor=tk.W, width=150)
-
-        # Insert actual data from the AddressBook
-        for i, contact in enumerate(contact_list, 1):
-            tree.insert("", "end", values=(contact.first_name, contact.last_name,
-                                           contact.phone_number, contact.email))
-
-        # Configure scrollbar
-        scrollbar = ttk.Scrollbar(window, orient="vertical", command=tree.yview)
-        tree.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side="right", fill="y")
-
-        # Pack the Treeview widget
-        tree.pack(expand=True, fill="both")
+        # sort order for contacts
+        self.sort_order = {"first_name": "desc", "last_name": "asc", "phone_number": "asc", "email": "asc"}
 
     @staticmethod
     def center_window(window):
@@ -80,12 +47,6 @@ class GUIFunctions:
                                    f"{contact.email}")
 
         return window, listbox
-
-    @staticmethod
-    def create_exit_button(window, side=tk.LEFT, x=10, y=10):
-        # Add a button to exit the loop and close the window
-        exit_button = tk.Button(window, text="Exit", command=window.destroy)
-        exit_button.pack(side=side, padx=x, pady=y)
 
     def add_contact(self):
         logger.log_info("Adding a contact.")
@@ -123,6 +84,9 @@ class GUIFunctions:
         # Handle confirming the addition of a contact
         ContactController.create_contact_and_add(
             first_name, last_name, phone_number, email)
+
+        # Sort contacts after adding a new one
+        address_book.contacts.sort(key=lambda x: x.first_name)
 
         # Update the treeview
         self.update_treeview()
@@ -164,24 +128,14 @@ class GUIFunctions:
         remove_button = tk.Button(remove_window, text="Remove Contact", command=remove_selected_contact)
         remove_button.pack(side=tk.LEFT, padx=5, pady=10)
 
-        self.create_exit_button(remove_window, tk.LEFT, 5, 10)
+        exit_button = tk.Button(remove_window, text="Exit", command=remove_window.destroy)
+        exit_button.pack(side=tk.LEFT, padx=10, pady=10)
 
         # Center the window on the screen
         self.center_window(remove_window)
 
         # Start the main loop for the Toplevel window
         remove_window.mainloop()
-
-    def display_contacts(self):
-        logger.log_info("Displaying contacts.")
-        # Handle displaying contacts
-        display_window = tk.Toplevel(self.root)
-        display_window.title("Display Contacts")
-        display_window.geometry("700x600")
-
-        GUIFunctions.tree_contacts(display_window, address_book.contacts)
-
-        GUIFunctions.center_window(display_window)
 
     def sort_contacts(self):
         # Display a Toplevel window for sorting contacts
@@ -390,33 +344,40 @@ class GUIFunctions:
         self.root.destroy()
         sys.exit(0)
 
-    def super_table_display(self):
+    def super_table_display(self, contacts=address_book.contacts):
         logger.log_info("Displaying contacts.")
         # Handle displaying contacts
+
+        # Sort contacts before displaying them
+        contacts.sort(key=lambda x: x.first_name)
 
         logger.log_info("Displaying contacts in a Treeview widget.")
         # Create Treeview widget
         self.super_tree = ttk.Treeview(self.super_table_frame)
-        self.super_tree["columns"] = ("First Name", "Last Name", "Phone Number", "Email")
+        self.super_tree["columns"] = ("first_name", "last_name", "phone_number", "email")
+
+        # Add handle heading click sort
+        for col in ("first_name", "last_name", "phone_number", "email"):
+            self.super_tree.heading(col, text=col, command=lambda c=col: self.super_table_display_sort(c))
 
         # Define column headings
         self.super_tree.heading("#0", text="")
         self.super_tree.column("#0", anchor=tk.W, width=0)
 
-        self.super_tree.heading("First Name", text="First Name")
-        self.super_tree.column("First Name", anchor=tk.W, width=80)
+        self.super_tree.heading("first_name", text="First Name")
+        self.super_tree.column("first_name", anchor=tk.W, width=80)
 
-        self.super_tree.heading("Last Name", text="Last Name")
-        self.super_tree.column("Last Name", anchor=tk.W, width=90)
+        self.super_tree.heading("last_name", text="Last Name")
+        self.super_tree.column("last_name", anchor=tk.W, width=90)
 
-        self.super_tree.heading("Phone Number", text="Phone Number")
-        self.super_tree.column("Phone Number", anchor=tk.W, width=100)
+        self.super_tree.heading("phone_number", text="Phone Number")
+        self.super_tree.column("phone_number", anchor=tk.W, width=100)
 
-        self.super_tree.heading("Email", text="Email")
-        self.super_tree.column("Email", anchor=tk.W, width=150)
+        self.super_tree.heading("email", text="Email")
+        self.super_tree.column("email", anchor=tk.W, width=150)
 
         # Insert actual data from the AddressBook
-        for i, contact in enumerate(address_book.contacts, 1):
+        for i, contact in enumerate(contacts, 1):
             self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
                                                       contact.phone_number, contact.email))
 
@@ -428,13 +389,38 @@ class GUIFunctions:
         # Pack the Treeview widget
         self.super_tree.pack(expand=True, fill="both")
 
-    def update_treeview(self):
+    def super_table_display_search(self):
+        pass
+
+    def super_table_display_sort(self, col):
+        # Handle sorting contacts
+        contacts = address_book.contacts
+        reverse_order = False
+
+        # Check if the column is already sorted
+        if self.sort_order[col] == "asc":
+            reverse_order = False
+            self.sort_order[col] = "desc"
+        else:
+            reverse_order = True
+            self.sort_order[col] = "asc"
+
+        # Sort contacts
+        contacts.sort(key=lambda x: getattr(x, col), reverse=reverse_order)
+
+        # Update the treeview
+        self.update_treeview()
+
+    def super_table_display_filter(self):
+        pass
+
+    def update_treeview(self, contacts=address_book.contacts):
         # Clear tree
         for item in self.super_tree.get_children():
             self.super_tree.delete(item)
 
         # Insert actual data from the AddressBook
-        for i, contact in enumerate(address_book.contacts, 1):
+        for i, contact in enumerate(contacts, 1):
             self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
                                                       contact.phone_number, contact.email))
 

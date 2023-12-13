@@ -12,7 +12,7 @@ class GUI:
     def __init__(self):
         self.master = tk.Tk()
         self.master.geometry("1000x700")
-        self.master.config(bg="white")
+        self.master.config(bg="#FFF5E1")
         self.master.resizable(False, False)
         self.master.title("Address Book")
         self.master.iconbitmap("assets/icon.ico")
@@ -30,7 +30,7 @@ class GUI:
         file_menu.add_command(label="Save contacts to", command=FileController.save_contacts_to_file)
 
         # Label for displaying date
-        self.date_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="white", fg="black")
+        self.date_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="#FFF5E1", fg="black")
         self.date_label.pack(anchor=tk.SW, padx=10, pady=10)
 
         # Display date
@@ -44,7 +44,7 @@ class GUI:
         button_frame = tk.Frame(middle_frame, bg="white", bd=5, relief=tk.SUNKEN)
         button_frame.pack(side=tk.LEFT, padx=5, pady=5)
 
-        buttons = ["Add contact", "Remove contact", "Display contacts", "Sort contacts",
+        buttons = ["Add contact", "Remove contact", "Sort contacts",
                    "Edit contact", "Clear contacts", "Recycle bin", "Exit"]
 
         for button_label in buttons:
@@ -63,7 +63,7 @@ class GUI:
         self.gui_functions.super_table_display()
 
         # Label for displaying a random fact
-        self.fact_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="white", fg="black", wraplength=600)
+        self.fact_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="#FFF5E1", fg="black", wraplength=600)
         self.fact_label.pack(side=tk.BOTTOM, anchor=tk.CENTER, padx=10, pady=10)
 
         # Display a random fact
@@ -90,7 +90,6 @@ class GUI:
         button_mapping = {
             "add_contact": self.gui_functions.add_contact,
             "remove_contact": self.gui_functions.remove_contact,
-            "display_contacts": self.gui_functions.display_contacts,
             "sort_contacts": self.gui_functions.sort_contacts,
             "edit_contact": self.gui_functions.edit_contact,
             "clear_contacts": self.gui_functions.clear_contacts,
