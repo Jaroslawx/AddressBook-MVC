@@ -62,9 +62,15 @@ class GUI:
         # Call super_table_display using the instance
         self.gui_functions.super_table_display()
 
+        # Label for "Fun Fact" heading
+        self.fun_fact_heading = tk.Label(self.master, text="Fun Fact:", font=("Helvetica", 12, "bold"), bg="#FFF5E1",
+                                         fg="black")
+        self.fun_fact_heading.pack(side=tk.TOP, anchor=tk.CENTER, padx=10, pady=10)
+
         # Label for displaying a random fact
-        self.fact_label = tk.Label(self.master, text="", font=("Helvetica", 12), bg="#FFF5E1", fg="black", wraplength=600)
-        self.fact_label.pack(side=tk.BOTTOM, anchor=tk.CENTER, padx=10, pady=10)
+        self.fun_fact_label = tk.Label(self.master, text="", font=("Helvetica", 11), bg="#FFF5E1", fg="black",
+                                       wraplength=1000)
+        self.fun_fact_label.pack(side=tk.TOP, anchor=tk.CENTER, padx=10, pady=10)
 
         # Display a random fact
         self.update_random_fact()
@@ -80,7 +86,7 @@ class GUI:
     def update_random_fact(self):
         # Update the fact label with a random fact
         random_fact = trivia.get_random_trivia()
-        self.fact_label.config(text=f"{random_fact}")
+        self.fun_fact_label.config(text=f"{random_fact}")
 
         # Schedule the next update after 10 seconds
         self.master.after(10000, self.update_random_fact)
@@ -89,9 +95,7 @@ class GUI:
         # Map button labels to corresponding methods in GUIFunctions
         button_mapping = {
             "add_contact": self.gui_functions.add_contact,
-            "remove_contact": self.gui_functions.remove_contact,
             "sort_contacts": self.gui_functions.sort_contacts,
-            "edit_contact": self.gui_functions.edit_contact,
             "clear_contacts": self.gui_functions.clear_contacts,
             "recycle_bin": self.gui_functions.recycle_bin,
             "exit": self.gui_functions.exit_program,

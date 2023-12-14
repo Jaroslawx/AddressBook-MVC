@@ -94,48 +94,18 @@ class GUIFunctions:
         # Close the window after adding the contact
         window.destroy()
 
-    def remove_contact(self):
-        logger.log_info("Removing a contact.")
-
-        # Handle removing a contact
-        remove_window, contacts_listbox = self.create_contacts_listbox("Remove Contact")
-
-        def remove_selected_contact():
-            selected_index = contacts_listbox.curselection()
-            if selected_index:
-                # Confirm removal
-                confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
-                if confirmation:
-                    # Remove the contact from the address book
-                    ContactController.remove_contact(selected_index[0])
-                    # Update the contacts listbox
-                    update_contacts_listbox()
-                    messagebox.showinfo("Success", "Contact removed successfully.")
-            else:
-                messagebox.showwarning("Warning", "Please select a contact to remove.")
-
-        def update_contacts_listbox():
-            # Clear the current contents of the listbox
-            contacts_listbox.delete(0, tk.END)
-            # Populate the Listbox with contact names
-            for c in address_book.contacts:
-                contacts_listbox.insert(tk.END, f"{c.first_name} {c.last_name} {c.phone_number} "
-                                                f"{c.email}")
-            # Update the treeview
-            self.update_treeview()
-
-        # Add a button to remove the selected contact
-        remove_button = tk.Button(remove_window, text="Remove Contact", command=remove_selected_contact)
-        remove_button.pack(side=tk.LEFT, padx=5, pady=10)
-
-        exit_button = tk.Button(remove_window, text="Exit", command=remove_window.destroy)
-        exit_button.pack(side=tk.LEFT, padx=10, pady=10)
-
-        # Center the window on the screen
-        self.center_window(remove_window)
-
-        # Start the main loop for the Toplevel window
-        remove_window.mainloop()
+    def remove_contact(self, selected_index):
+        if selected_index:
+            # Confirm removal
+            confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
+            if confirmation:
+                # Remove the contact from the address book
+                ContactController.remove_contact(selected_index)
+                # Update the contacts treeview
+                self.update_treeview()
+                messagebox.showinfo("Success", "Contact removed successfully.")
+        else:
+            messagebox.showwarning("Warning", "Please select a contact to remove.")
 
     def sort_contacts(self):
         # Display a Toplevel window for sorting contacts
@@ -182,97 +152,74 @@ class GUIFunctions:
         # Start the main loop for the Toplevel window
         sort_window.mainloop()
 
-    def edit_contact(self):
-        logger.log_info("Editing a contact.")
+    def edit_contact(self, selected_index):
+        # Get the selected contact
+        selected_contact = address_book.contacts[selected_index]
 
-        # Handle editing a contact
-        edit_window, contacts_listbox = self.create_contacts_listbox("Edit Contact")
+        # Create a Toplevel window for editing
+        edit_contact_window = tk.Toplevel(self.root)
+        edit_contact_window.title("Edit Contact")
+        edit_contact_window.geometry("350x150")
 
-        # Function to handle editing a contact
-        def edit_selected_contact():
-            selected_index = contacts_listbox.curselection()
-            if selected_index:
-                # Get the selected contact
-                selected_contact = address_book.contacts[selected_index[0]]
+        # Display the old and new values
+        tk.Label(edit_contact_window, text="Old Value:").grid(row=0, column=0)
+        tk.Label(edit_contact_window, text="New Value:").grid(row=0, column=1)
 
-                # Create a Toplevel window for editing
-                edit_contact_window = tk.Toplevel(edit_window)
-                edit_contact_window.title("Edit Contact")
+        # Display old values
+        tk.Label(edit_contact_window, text=f"First Name: {selected_contact.first_name}").grid(row=1, column=0)
+        tk.Label(edit_contact_window, text=f"Last Name: {selected_contact.last_name}").grid(row=2, column=0)
+        tk.Label(edit_contact_window, text=f"Phone Number: {selected_contact.phone_number}").grid(row=3,
+                                                                                                  column=0)
+        tk.Label(edit_contact_window, text=f"Email: {selected_contact.email}").grid(row=4, column=0)
 
-                # Display the old and new values
-                tk.Label(edit_contact_window, text="Old Value:").grid(row=0, column=0)
-                tk.Label(edit_contact_window, text="New Value:").grid(row=0, column=1)
+        # Entry widgets for new values
+        new_first_name_entry = tk.Entry(edit_contact_window)
+        new_last_name_entry = tk.Entry(edit_contact_window)
+        new_phone_number_entry = tk.Entry(edit_contact_window)
+        new_email_entry = tk.Entry(edit_contact_window)
 
-                # Display old values
-                tk.Label(edit_contact_window, text=f"First Name: {selected_contact.first_name}").grid(row=1, column=0)
-                tk.Label(edit_contact_window, text=f"Last Name: {selected_contact.last_name}").grid(row=2, column=0)
-                tk.Label(edit_contact_window, text=f"Phone Number: {selected_contact.phone_number}").grid(row=3,
-                                                                                                          column=0)
-                tk.Label(edit_contact_window, text=f"Email: {selected_contact.email}").grid(row=4, column=0)
+        new_first_name_entry.grid(row=1, column=1)
+        new_last_name_entry.grid(row=2, column=1)
+        new_phone_number_entry.grid(row=3, column=1)
+        new_email_entry.grid(row=4, column=1)
 
-                # Entry widgets for new values
-                new_first_name_entry = tk.Entry(edit_contact_window)
-                new_last_name_entry = tk.Entry(edit_contact_window)
-                new_phone_number_entry = tk.Entry(edit_contact_window)
-                new_email_entry = tk.Entry(edit_contact_window)
+        # Function to handle updating the contact
+        def update_contact():
+            # Get new values
+            new_first_name = new_first_name_entry.get()
+            new_last_name = new_last_name_entry.get()
+            new_phone_number = new_phone_number_entry.get()
+            new_email = new_email_entry.get()
 
-                new_first_name_entry.grid(row=1, column=1)
-                new_last_name_entry.grid(row=2, column=1)
-                new_phone_number_entry.grid(row=3, column=1)
-                new_email_entry.grid(row=4, column=1)
+            # Update the contact
+            selected_contact.first_name = new_first_name if new_first_name \
+                else selected_contact.first_name
+            selected_contact.last_name = new_last_name if new_last_name \
+                else selected_contact.last_name
+            selected_contact.phone_number = new_phone_number if new_phone_number \
+                else selected_contact.phone_number
+            selected_contact.email = new_email if new_email \
+                else selected_contact.email
 
-                # Function to handle updating the contact
-                def update_contact():
-                    # Get new values
-                    new_first_name = new_first_name_entry.get()
-                    new_last_name = new_last_name_entry.get()
-                    new_phone_number = new_phone_number_entry.get()
-                    new_email = new_email_entry.get()
+            messagebox.showinfo("Success", "Contact updated successfully.")
 
-                    # Update the contact
-                    selected_contact.first_name = new_first_name if new_first_name \
-                        else selected_contact.first_name
-                    selected_contact.last_name = new_last_name if new_last_name \
-                        else selected_contact.last_name
-                    selected_contact.phone_number = new_phone_number if new_phone_number \
-                        else selected_contact.phone_number
-                    selected_contact.email = new_email if new_email \
-                        else selected_contact.email
+            # Update the treeview
+            self.update_treeview()
 
-                    # Update the Listbox
-                    contacts_listbox.delete(selected_index[0])
-                    contacts_listbox.insert(selected_index[0], f"{selected_contact.first_name} "
-                                                               f"{selected_contact.last_name} "
-                                                               f"{selected_contact.phone_number} "
-                                                               f"{selected_contact.email}")
+            edit_contact_window.destroy()
 
-                    messagebox.showinfo("Success", "Contact updated successfully.")
+        # TODO: po edycji usunięciu, zamyka okno lub odświeża, żeby były nowe wartości
 
-                    # Update the treeview
-                    self.update_treeview()
+        # Add a button to update the contact
+        update_button = tk.Button(edit_contact_window, text="Update Contact", command=update_contact)
+        update_button.grid(row=5, column=0, columnspan=2, pady=10)
 
-                    edit_contact_window.destroy()
-
-                # Add a button to update the contact
-                update_button = tk.Button(edit_contact_window, text="Update Contact", command=update_contact)
-                update_button.grid(row=5, column=0, columnspan=2, pady=10)
-
-            else:
-                messagebox.showwarning("Warning", "Please select a contact to edit.")
-
-        # Add a button to edit the selected contact
-        edit_button = tk.Button(edit_window, text="Edit Contact", command=edit_selected_contact)
-        edit_button.pack(pady=10)
-
-        # Add a button to exit the loop and close the window
-        exit_button = tk.Button(edit_window, text="Exit", command=edit_window.destroy)
-        exit_button.pack(pady=10)
+        # Add a button to cancel the update
+        cancel_button = tk.Button(edit_contact_window, text="Cancel", command=edit_contact_window.destroy)
+        cancel_button.grid(row=5, column=1, columnspan=2, pady=10)
 
         # Center the window on the screen
-        GUIFunctions.center_window(edit_window)
-
-        # Start the main loop for the Toplevel window
-        edit_window.mainloop()
+        GUIFunctions.center_window(edit_contact_window)
 
     def clear_contacts(self):
         logger.log_info("Clearing contacts.")
@@ -338,12 +285,6 @@ class GUIFunctions:
         # Start the main loop for the Toplevel window
         restore_window.mainloop()
 
-    def exit_program(self):
-        logger.log_info("Application closed.")
-        # Handle exiting the program
-        self.root.destroy()
-        sys.exit(0)
-
     def super_table_display(self, contacts=address_book.contacts):
         logger.log_info("Displaying contacts.")
         # Handle displaying contacts
@@ -353,7 +294,7 @@ class GUIFunctions:
 
         logger.log_info("Displaying contacts in a Treeview widget.")
         # Create Treeview widget
-        self.super_tree = ttk.Treeview(self.super_table_frame)
+        self.super_tree = ttk.Treeview(self.super_table_frame, style="Treeview")
         self.super_tree["columns"] = ("first_name", "last_name", "phone_number", "email")
 
         # Add handle heading click sort
@@ -386,16 +327,66 @@ class GUIFunctions:
         self.super_tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
 
+        # Add style to the Treeview for lines between columns
+        style = ttk.Style()
+        style.configure("Treeview", background="white", fieldbackground="lightgray", borderwidth=1, relief="solid")
+
         # Pack the Treeview widget
         self.super_tree.pack(expand=True, fill="both")
 
-    def super_table_display_search(self):
-        pass
+        # Bind the click event to a function
+        self.super_tree.bind("<ButtonRelease-1>", self.show_contact_details)
+
+    def show_contact_details(self, event):
+        # Get the selected item
+        selected_item = self.super_tree.selection()
+
+        if selected_item:
+            # Find the index of the selected item
+            index = self.super_tree.index(selected_item[0])
+
+            # Display a popup window with contact details
+            self.show_contact_popup(index)
+
+    def show_contact_popup(self, index):
+        # Create a popup window with contact details
+        popup = tk.Toplevel(self.root)
+        popup.title("Contact Details")
+
+        # Set the dimensions of the popup window
+        popup.geometry("275x150")
+
+        # Get the contact based on the index
+        selected_contact = address_book.contacts[index]
+
+        # Display contact details in the popup window
+        tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
+            anchor="w")
+        tk.Label(popup, text=f"Last Name: {selected_contact.last_name}", font=("Helvetica", 10, "bold")).pack(
+            anchor="w")
+        tk.Label(popup, text=f"Phone Number: {selected_contact.phone_number}", font=("Helvetica", 10, "bold")).pack(
+            anchor="w")
+        tk.Label(popup, text=f"Email: {selected_contact.email}", font=("Helvetica", 10, "bold")).pack(anchor="w")
+
+        # Add buttons for editing and deleting the contact
+        button_frame = tk.Frame(popup)
+        button_frame.pack(side=tk.BOTTOM)
+
+        tk.Button(button_frame, text="Edit Contact", command=lambda: self.edit_contact(index)).pack(
+            side=tk.LEFT, padx=10, pady=10)
+        tk.Button(button_frame, text="Delete Contact", command=lambda: self.remove_contact(index)).pack(
+            side=tk.LEFT, padx=10, pady=10)
+        tk.Button(button_frame, text="Exit", command=lambda: popup.destroy()).pack(
+            side=tk.LEFT, padx=10, pady=10)
+
+        # Center the window on the screen
+        GUIFunctions.center_window(popup)
+
+        GUIFunctions.update_treeview(self)
 
     def super_table_display_sort(self, col):
         # Handle sorting contacts
         contacts = address_book.contacts
-        reverse_order = False
 
         # Check if the column is already sorted
         if self.sort_order[col] == "asc":
@@ -426,3 +417,9 @@ class GUIFunctions:
 
         # Update idletasks to refresh the Treeview
         self.super_tree.update_idletasks()
+
+    def exit_program(self):
+        logger.log_info("Application closed.")
+        # Handle exiting the program
+        self.root.destroy()
+        sys.exit(0)
