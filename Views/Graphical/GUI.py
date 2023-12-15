@@ -44,8 +44,7 @@ class GUI:
         button_frame = tk.Frame(middle_frame, bg="white", bd=5, relief=tk.SUNKEN)
         button_frame.pack(side=tk.LEFT, padx=5, pady=5)
 
-        buttons = ["Add contact", "Remove contact", "Sort contacts",
-                   "Edit contact", "Clear contacts", "Recycle bin", "Exit"]
+        buttons = ["Add contact", "Sort contacts", "Clear contacts", "Recycle bin", "Exit"]
 
         for button_label in buttons:
             button = tk.Button(button_frame, text=button_label,

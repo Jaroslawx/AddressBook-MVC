@@ -31,23 +31,6 @@ class GUIFunctions:
 
         window.geometry(f"{width}x{height}+{x}+{y}")
 
-    def create_contacts_listbox(self, name="Window"):
-        # Display a Toplevel window to show the list of contacts
-        window = tk.Toplevel(self.root)
-        window.title(name)
-        window.geometry("500x400")
-
-        # Create a Listbox to display contacts
-        listbox = tk.Listbox(window, selectmode=tk.SINGLE, width=90, height=20)
-        listbox.pack(padx=10, pady=10)
-
-        # Populate the Listbox with contact names
-        for contact in address_book.contacts:
-            listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} "
-                                   f"{contact.email}")
-
-        return window, listbox
-
     def add_contact(self):
         logger.log_info("Adding a contact.")
         # Handle adding a contact
@@ -76,9 +59,15 @@ class GUIFunctions:
         email_entry.grid(row=3, column=1, padx=10, pady=5)
 
         # Button to confirm contact addition
-        add_button = tk.Button(add_window, text="Add", command=lambda: self.confirm_add_contact(
+        add_button = tk.Button(add_window, text="Add Contact", command=lambda: self.confirm_add_contact(
             add_window, first_name_entry.get(), last_name_entry.get(), phone_number_entry.get(), email_entry.get()))
-        add_button.grid(row=4, columnspan=2, pady=10)
+        add_button.grid(row=5, column=0, columnspan=1, pady=10)
+
+        # Button to cancel contact addition
+        cancel_button = tk.Button(add_window, text="Cancel", command=add_window.destroy)
+        cancel_button.grid(row=5, column=1, columnspan=2, pady=10)
+
+        self.center_window(add_window)
 
     def confirm_add_contact(self, window, first_name, last_name, phone_number, email):
         # Handle confirming the addition of a contact
@@ -93,6 +82,8 @@ class GUIFunctions:
 
         # Close the window after adding the contact
         window.destroy()
+
+        self.add_contact()
 
     def remove_contact(self, selected_index, popup=None):
         popup.destroy()
@@ -112,51 +103,6 @@ class GUIFunctions:
                 self.show_contact_popup(selected_index)
         else:
             messagebox.showwarning("Warning", "Please select a contact to remove.")
-
-    def sort_contacts(self):
-        # Display a Toplevel window for sorting contacts
-        sort_window = tk.Toplevel(self.root)
-        sort_window.title("Sort Contacts")
-        sort_window.geometry("300x200")
-
-        # Function to handle sorting contacts
-        def temp_sort(heading, reverse_flag):
-            ContactController.sort_contacts(heading, reverse_flag)
-            messagebox.showinfo("Success",
-                                f"Contacts sorted by {label_mapping[heading]} in "
-                                f"{'descending' if reverse_flag else 'ascending'} order.")
-
-            # Update the treeview
-            self.update_treeview()
-
-        # Create labels and buttons for sorting
-        sort_labels = ["Name", "Surname", "Number", "Email"]
-        pattern = ["first_name", "last_name", "phone_number", "email"]
-        # Mapping option to label
-        label_mapping = {"first_name": "Name", "last_name": "Surname", "phone_number": "Number", "email": "Email"}
-
-        for label, option in zip(sort_labels, pattern):
-            label_frame = tk.Frame(sort_window)
-            label_frame.pack(pady=5)
-
-            label_text = tk.Label(label_frame, text=f"By {label}")
-            label_text.pack(side=tk.LEFT)
-
-            asc_button = tk.Button(label_frame, text="Ascending", command=lambda opt=option: temp_sort(opt, False))
-            asc_button.pack(side=tk.LEFT, padx=5)
-
-            desc_button = tk.Button(label_frame, text="Descending", command=lambda opt=option: temp_sort(opt, True))
-            desc_button.pack(side=tk.LEFT)
-
-        # Add a button to exit the loop and close the window
-        exit_button = tk.Button(sort_window, text="Exit", command=sort_window.destroy)
-        exit_button.pack(pady=10)
-
-        # Center the window on the screen
-        GUIFunctions.center_window(sort_window)
-
-        # Start the main loop for the Toplevel window
-        sort_window.mainloop()
 
     def edit_contact(self, selected_index, popup=None):
         popup.destroy()
@@ -228,70 +174,6 @@ class GUIFunctions:
 
         # Center the window on the screen
         GUIFunctions.center_window(edit_contact_window)
-
-    def clear_contacts(self):
-        logger.log_info("Clearing contacts.")
-        # Handle clearing contacts
-        ContactController.clear_contacts()
-
-        # Update the treeview
-        self.update_treeview()
-
-    def recycle_bin(self):
-        # Function to handle restoring a contact from the recycle bin
-        def restore_selected_contact():
-            selected_index = listbox.curselection()
-            if selected_index:
-                # Confirm restoration
-                confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to restore this contact?")
-                if confirmation:
-                    # Restore the contact to the main address book
-                    ContactController.restore_contact(selected_index[0])
-                    # Update the recycle bin
-                    update_recycle_bin()
-                    messagebox.showinfo("Success", "Contact restored successfully.")
-            else:
-                messagebox.showwarning("Warning", "Please select a contact to restore.")
-
-        # Function to update the recycle bin after restoring a contact
-        def update_recycle_bin():
-            # Clear the current contents of the Listbox
-            listbox.delete(0, tk.END)
-
-            # Populate the Listbox with contact names
-            for c in address_book.removed_contacts:
-                listbox.insert(tk.END,
-                               f"{c.first_name} {c.last_name} {c.phone_number} {c.email}")
-
-            # Update the treeview
-            self.update_treeview()
-
-        # Display a Toplevel window to show the list of contacts
-        restore_window = tk.Toplevel(self.root)
-        restore_window.title("Recycle Bin")
-        restore_window.geometry("500x400")
-
-        # Create Listbox widget for the recycle bin
-        listbox = tk.Listbox(restore_window, selectmode=tk.SINGLE, width=90, height=20)
-        listbox.pack(padx=10, pady=10)
-
-        # Populate the Listbox with contact names from the removed contacts
-        for contact in address_book.removed_contacts:
-            listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} {contact.email}")
-
-        # Add a button to remove the selected contact
-        restore_button = tk.Button(restore_window, text="Restore Contact", command=restore_selected_contact)
-        restore_button.pack(side=tk.LEFT, padx=5, pady=10)
-
-        # Add a button to exit the loop and close the window
-        exit_button = tk.Button(restore_window, text="Exit", command=restore_window.destroy)
-        exit_button.pack(side=tk.LEFT, padx=5, pady=10)
-
-        # Center the window on the screen
-        GUIFunctions.center_window(restore_window)
-
-        # Start the main loop for the Toplevel window
-        restore_window.mainloop()
 
     def super_table_display(self, contacts=address_book.contacts):
         logger.log_info("Displaying contacts.")
@@ -422,6 +304,115 @@ class GUIFunctions:
 
         # Update idletasks to refresh the Treeview
         self.super_tree.update_idletasks()
+
+    def clear_contacts(self):
+        logger.log_info("Clearing contacts.")
+        # Handle clearing contacts
+        ContactController.clear_contacts()
+
+        # Update the treeview
+        self.update_treeview()
+
+    def sort_contacts(self):
+        # Display a Toplevel window for sorting contacts
+        sort_window = tk.Toplevel(self.root)
+        sort_window.title("Sort Contacts")
+        sort_window.geometry("300x200")
+
+        # Function to handle sorting contacts
+        def temp_sort(heading, reverse_flag):
+            ContactController.sort_contacts(heading, reverse_flag)
+            messagebox.showinfo("Success",
+                                f"Contacts sorted by {label_mapping[heading]} in "
+                                f"{'descending' if reverse_flag else 'ascending'} order.")
+
+            # Update the treeview
+            self.update_treeview()
+
+        # Create labels and buttons for sorting
+        sort_labels = ["Name", "Surname", "Number", "Email"]
+        pattern = ["first_name", "last_name", "phone_number", "email"]
+        # Mapping option to label
+        label_mapping = {"first_name": "Name", "last_name": "Surname", "phone_number": "Number", "email": "Email"}
+
+        for label, option in zip(sort_labels, pattern):
+            label_frame = tk.Frame(sort_window)
+            label_frame.pack(pady=5)
+
+            label_text = tk.Label(label_frame, text=f"By {label}")
+            label_text.pack(side=tk.LEFT)
+
+            asc_button = tk.Button(label_frame, text="Ascending", command=lambda opt=option: temp_sort(opt, False))
+            asc_button.pack(side=tk.LEFT, padx=5)
+
+            desc_button = tk.Button(label_frame, text="Descending", command=lambda opt=option: temp_sort(opt, True))
+            desc_button.pack(side=tk.LEFT)
+
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(sort_window, text="Exit", command=sort_window.destroy)
+        exit_button.pack(pady=10)
+
+        # Center the window on the screen
+        GUIFunctions.center_window(sort_window)
+
+        # Start the main loop for the Toplevel window
+        sort_window.mainloop()
+
+    def recycle_bin(self):
+        # Function to handle restoring a contact from the recycle bin
+        def restore_selected_contact():
+            selected_index = listbox.curselection()
+            if selected_index:
+                # Confirm restoration
+                confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to restore this contact?")
+                if confirmation:
+                    # Restore the contact to the main address book
+                    ContactController.restore_contact(selected_index[0])
+                    # Update the recycle bin
+                    update_recycle_bin()
+                    messagebox.showinfo("Success", "Contact restored successfully.")
+            else:
+                messagebox.showwarning("Warning", "Please select a contact to restore.")
+
+        # Function to update the recycle bin after restoring a contact
+        def update_recycle_bin():
+            # Clear the current contents of the Listbox
+            listbox.delete(0, tk.END)
+
+            # Populate the Listbox with contact names
+            for c in address_book.removed_contacts:
+                listbox.insert(tk.END,
+                               f"{c.first_name} {c.last_name} {c.phone_number} {c.email}")
+
+            # Update the treeview
+            self.update_treeview()
+
+        # Display a Toplevel window to show the list of contacts
+        restore_window = tk.Toplevel(self.root)
+        restore_window.title("Recycle Bin")
+        restore_window.geometry("500x400")
+
+        # Create Listbox widget for the recycle bin
+        listbox = tk.Listbox(restore_window, selectmode=tk.SINGLE, width=90, height=20)
+        listbox.pack(padx=10, pady=10)
+
+        # Populate the Listbox with contact names from the removed contacts
+        for contact in address_book.removed_contacts:
+            listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} {contact.email}")
+
+        # Add a button to remove the selected contact
+        restore_button = tk.Button(restore_window, text="Restore Contact", command=restore_selected_contact)
+        restore_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        # Add a button to exit the loop and close the window
+        exit_button = tk.Button(restore_window, text="Exit", command=restore_window.destroy)
+        exit_button.pack(side=tk.LEFT, padx=5, pady=10)
+
+        # Center the window on the screen
+        GUIFunctions.center_window(restore_window)
+
+        # Start the main loop for the Toplevel window
+        restore_window.mainloop()
 
     def exit_program(self):
         logger.log_info("Application closed.")
