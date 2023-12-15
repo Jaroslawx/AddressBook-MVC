@@ -94,16 +94,22 @@ class GUIFunctions:
         # Close the window after adding the contact
         window.destroy()
 
-    def remove_contact(self, selected_index):
+    def remove_contact(self, selected_index, popup=None):
+        popup.destroy()
+
+        # Handle removing a contact
         if selected_index:
             # Confirm removal
             confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
             if confirmation:
                 # Remove the contact from the address book
                 ContactController.remove_contact(selected_index)
+
                 # Update the contacts treeview
                 self.update_treeview()
                 messagebox.showinfo("Success", "Contact removed successfully.")
+            else:
+                self.show_contact_popup(selected_index)
         else:
             messagebox.showwarning("Warning", "Please select a contact to remove.")
 
@@ -152,7 +158,9 @@ class GUIFunctions:
         # Start the main loop for the Toplevel window
         sort_window.mainloop()
 
-    def edit_contact(self, selected_index):
+    def edit_contact(self, selected_index, popup=None):
+        popup.destroy()
+
         # Get the selected contact
         selected_contact = address_book.contacts[selected_index]
 
@@ -208,7 +216,7 @@ class GUIFunctions:
 
             edit_contact_window.destroy()
 
-        # TODO: po edycji usunięciu, zamyka okno lub odświeża, żeby były nowe wartości
+            self.show_contact_popup(selected_index)
 
         # Add a button to update the contact
         update_button = tk.Button(edit_contact_window, text="Update Contact", command=update_contact)
@@ -372,9 +380,9 @@ class GUIFunctions:
         button_frame = tk.Frame(popup)
         button_frame.pack(side=tk.BOTTOM)
 
-        tk.Button(button_frame, text="Edit Contact", command=lambda: self.edit_contact(index)).pack(
+        tk.Button(button_frame, text="Edit Contact", command=lambda: self.edit_contact(index, popup)).pack(
             side=tk.LEFT, padx=10, pady=10)
-        tk.Button(button_frame, text="Delete Contact", command=lambda: self.remove_contact(index)).pack(
+        tk.Button(button_frame, text="Delete Contact", command=lambda: self.remove_contact(index, popup)).pack(
             side=tk.LEFT, padx=10, pady=10)
         tk.Button(button_frame, text="Exit", command=lambda: popup.destroy()).pack(
             side=tk.LEFT, padx=10, pady=10)
@@ -401,9 +409,6 @@ class GUIFunctions:
 
         # Update the treeview
         self.update_treeview()
-
-    def super_table_display_filter(self):
-        pass
 
     def update_treeview(self, contacts=address_book.contacts):
         # Clear tree
