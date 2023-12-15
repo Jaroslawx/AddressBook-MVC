@@ -13,9 +13,6 @@ class GUIFunctions:
         self.contacts_tree = None
         self.display_frame = display_frame
 
-        self.contacts = address_book.contacts
-        self.unmatched_contacts = address_book.unmatched_contacts
-
         # sort order for contacts
         self.sort_order = {"first_name": "desc", "last_name": "asc", "phone_number": "asc", "email": "asc"}
 
@@ -78,7 +75,7 @@ class GUIFunctions:
             first_name, last_name, phone_number, email)
 
         # Sort contacts after adding a new one
-        self.contacts.sort(key=lambda x: x.first_name)
+        address_book.contacts.sort(key=lambda x: x.first_name)
 
         # Update the treeview
         self.update_treeview()
@@ -92,7 +89,7 @@ class GUIFunctions:
         popup.destroy()
 
         # Handle removing a contact
-        if self.contacts[selected_index]:
+        if address_book.contacts[selected_index]:
             # Confirm removal
             confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
             if confirmation:
@@ -112,7 +109,7 @@ class GUIFunctions:
         popup.destroy()
 
         # Get the selected contact
-        selected_contact = self.contacts[selected_index]
+        selected_contact = address_book.contacts[selected_index]
 
         # Create a Toplevel window for editing
         edit_contact_window = tk.Toplevel(self.root)
@@ -209,7 +206,7 @@ class GUIFunctions:
         self.contacts_tree.column("email", anchor=tk.W, width=150)
 
         # Insert actual data from the AddressBook
-        for i, contact in enumerate(self.contacts, 1):
+        for i, contact in enumerate(address_book.contacts, 1):
             self.contacts_tree.insert("", "end", values=(contact.first_name, contact.last_name,
                                                          contact.phone_number, contact.email))
 
@@ -234,7 +231,7 @@ class GUIFunctions:
             self.contacts_tree.delete(item)
 
         # Insert actual data from the AddressBook
-        for i, contact in enumerate(self.contacts, 1):
+        for i, contact in enumerate(address_book.contacts, 1):
             self.contacts_tree.insert("", "end", values=(contact.first_name, contact.last_name,
                                                          contact.phone_number, contact.email))
 
@@ -261,7 +258,7 @@ class GUIFunctions:
         popup.geometry("275x150")
 
         # Get the contact based on the index
-        selected_contact = self.contacts[index]
+        selected_contact = address_book.contacts[index]
 
         # Display contact details in the popup window
         tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
@@ -300,7 +297,7 @@ class GUIFunctions:
             self.sort_order[col] = "asc"
 
         # Sort contacts
-        self.contacts.sort(key=lambda x: getattr(x, col), reverse=reverse_order)
+        address_book.contacts.sort(key=lambda x: getattr(x, col), reverse=reverse_order)
 
         # Update the treeview
         self.update_treeview()
@@ -322,7 +319,7 @@ class GUIFunctions:
             entry.pack(side=tk.TOP, anchor=tk.N)
 
         # Add a button to perform the search
-        search_button = tk.Button(input_search_frame, text="Search", command=lambda: self.perform_search(entries))
+        search_button = tk.Button(input_search_frame, text="Search", command=lambda: on_perform_search())
         search_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
 
         # Add a button to perform the search
@@ -334,14 +331,14 @@ class GUIFunctions:
         exit_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
 
         def on_perform_search():
+            address_book.contacts.extend(address_book.unmatched_contacts)
+            address_book.unmatched_contacts.clear()
 
             self.perform_search(entries)
 
         def on_closing():
             self.reset_contacts()
             input_search_frame.destroy()
-
-        # TODO: fix show_contact_popup, when we got search results, maybe create new tree with sorted contacts?
 
     def perform_search(self, entries):
         # Get search criteria from the entry widgets
@@ -351,7 +348,7 @@ class GUIFunctions:
         email = entries[3].get()
 
         # Perform the search based on the criteria
-        self.contacts, self.unmatched_contacts = ContactController.search_contact(name, surname, phone_number, email)
+        address_book.contacts, address_book.unmatched_contacts = ContactController.search_contact(name, surname, phone_number, email)
 
         # Display the search results
         self.clear_frame(self.display_frame)
@@ -360,8 +357,8 @@ class GUIFunctions:
     def reset_contacts(self):
         ContactController.reset_search()
 
-        self.contacts = address_book.contacts
-        self.unmatched_contacts = address_book.unmatched_contacts
+        address_book.contacts = address_book.contacts
+        address_book.unmatched_contacts = address_book.unmatched_contacts
 
         self.clear_frame(self.display_frame)
         self.contacts_display()
