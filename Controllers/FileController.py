@@ -37,6 +37,8 @@ class FileController:
             finally:
                 root.destroy()
 
+        address_book.contacts.sort(key=lambda x: x.first_name)
+
     @staticmethod
     def save_contacts_to_file(filename="contacts.txt", contacts=address_book.contacts):
         try:

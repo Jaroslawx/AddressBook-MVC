@@ -17,6 +17,23 @@ class ContactController:
         logger.log_info(f"Contact deleted from the list and added to the recycle bin.")
 
     @staticmethod
+    def search_contact(name="", surname="", phone="", email=""):
+        # Create search results list
+        results = []
+
+        # Iterate over all contacts
+        for contact in address_book.contacts:
+            # Check if the contact matches the search criteria
+            if (not name or name.lower() in contact.first_name.lower()) and \
+                    (not surname or surname.lower() in contact.last_name.lower()) and \
+                    (not phone or str(phone) in str(contact.phone_number)) and \
+                    (not email or email.lower() in contact.email.lower()):
+                # Add the contact to the results list
+                results.append(contact)
+
+        return results
+
+    @staticmethod
     def restore_contact(index):
         address_book.contacts.append(address_book.removed_contacts[index])
         address_book.removed_contacts.pop(index)
