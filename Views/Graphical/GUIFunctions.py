@@ -8,13 +8,13 @@ import sys
 
 
 class GUIFunctions:
-    def __init__(self, master, super_table_frame):
+    def __init__(self, master, display_frame):
         self.root = master
-        self.super_tree = None
-        self.super_table_frame = super_table_frame
+        self.contacts_tree = None
+        self.display_frame = display_frame
 
-        # List of original indices
-        self.original_indices = []
+        self.contacts = address_book.contacts
+        self.unmatched_contacts = address_book.unmatched_contacts
 
         # sort order for contacts
         self.sort_order = {"first_name": "desc", "last_name": "asc", "phone_number": "asc", "email": "asc"}
@@ -78,7 +78,7 @@ class GUIFunctions:
             first_name, last_name, phone_number, email)
 
         # Sort contacts after adding a new one
-        address_book.contacts.sort(key=lambda x: x.first_name)
+        self.contacts.sort(key=lambda x: x.first_name)
 
         # Update the treeview
         self.update_treeview()
@@ -92,15 +92,16 @@ class GUIFunctions:
         popup.destroy()
 
         # Handle removing a contact
-        if 0 <= selected_index < len(address_book.contacts):
+        if self.contacts[selected_index]:
             # Confirm removal
             confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
             if confirmation:
                 # Remove the contact from the address book
                 ContactController.remove_contact(selected_index)
 
-                # Update the contacts treeview
-                self.update_treeview()
+                self.clear_frame(self.display_frame)
+                self.contacts_display()
+
                 messagebox.showinfo("Success", "Contact removed successfully.")
             else:
                 self.show_contact_popup(selected_index)
@@ -111,7 +112,7 @@ class GUIFunctions:
         popup.destroy()
 
         # Get the selected contact
-        selected_contact = address_book.contacts[selected_index]
+        selected_contact = self.contacts[selected_index]
 
         # Create a Toplevel window for editing
         edit_contact_window = tk.Toplevel(self.root)
@@ -178,46 +179,43 @@ class GUIFunctions:
         # Center the window on the screen
         GUIFunctions.center_window(edit_contact_window)
 
-    def super_table_display(self, contacts=address_book.contacts):
+    def contacts_display(self):
         # Handle displaying contacts
         logger.log_info("Displaying contacts.")
 
-        # Add original indices
-        # self.original_indices = list(range(len(contacts)))
-
         logger.log_info("Displaying contacts in a Treeview widget.")
         # Create Treeview widget
-        self.super_tree = ttk.Treeview(self.super_table_frame, style="Treeview")
-        self.super_tree["columns"] = ("first_name", "last_name", "phone_number", "email")
+        self.contacts_tree = ttk.Treeview(self.display_frame, style="Treeview")
+        self.contacts_tree["columns"] = ("first_name", "last_name", "phone_number", "email")
 
         # Add handle heading click sort
         for col in ("first_name", "last_name", "phone_number", "email"):
-            self.super_tree.heading(col, text=col, command=lambda c=col: self.super_table_display_sort(c))
+            self.contacts_tree.heading(col, text=col, command=lambda c=col: self.super_table_display_sort(c))
 
         # Define column headings
-        self.super_tree.heading("#0", text="")
-        self.super_tree.column("#0", anchor=tk.W, width=0)
+        self.contacts_tree.heading("#0", text="")
+        self.contacts_tree.column("#0", anchor=tk.W, width=0)
 
-        self.super_tree.heading("first_name", text="First Name")
-        self.super_tree.column("first_name", anchor=tk.W, width=80)
+        self.contacts_tree.heading("first_name", text="First Name")
+        self.contacts_tree.column("first_name", anchor=tk.W, width=80)
 
-        self.super_tree.heading("last_name", text="Last Name")
-        self.super_tree.column("last_name", anchor=tk.W, width=90)
+        self.contacts_tree.heading("last_name", text="Last Name")
+        self.contacts_tree.column("last_name", anchor=tk.W, width=90)
 
-        self.super_tree.heading("phone_number", text="Phone Number")
-        self.super_tree.column("phone_number", anchor=tk.W, width=100)
+        self.contacts_tree.heading("phone_number", text="Phone Number")
+        self.contacts_tree.column("phone_number", anchor=tk.W, width=100)
 
-        self.super_tree.heading("email", text="Email")
-        self.super_tree.column("email", anchor=tk.W, width=150)
+        self.contacts_tree.heading("email", text="Email")
+        self.contacts_tree.column("email", anchor=tk.W, width=150)
 
         # Insert actual data from the AddressBook
-        for i, contact in enumerate(contacts, 1):
-            self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
-                                                      contact.phone_number, contact.email))
+        for i, contact in enumerate(self.contacts, 1):
+            self.contacts_tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                         contact.phone_number, contact.email))
 
         # Configure scrollbar
-        scrollbar = ttk.Scrollbar(self.super_table_frame, orient="vertical", command=self.super_tree.yview)
-        self.super_tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar = ttk.Scrollbar(self.display_frame, orient="vertical", command=self.contacts_tree.yview)
+        self.contacts_tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
 
         # Add style to the Treeview for lines between columns
@@ -225,32 +223,31 @@ class GUIFunctions:
         style.configure("Treeview", background="white", fieldbackground="lightgray", borderwidth=1, relief="solid")
 
         # Pack the Treeview widget
-        self.super_tree.pack(expand=True, fill="both")
+        self.contacts_tree.pack(expand=True, fill="both")
 
         # Bind the click event to a function
-        self.super_tree.bind("<ButtonRelease-1>", self.show_contact_details)
+        self.contacts_tree.bind("<ButtonRelease-1>", self.show_contact_details)
 
-    def update_treeview(self, contacts=address_book.contacts):
+    def update_treeview(self):
         # Clear tree
-        for item in self.super_tree.get_children():
-            self.super_tree.delete(item)
+        for item in self.contacts_tree.get_children():
+            self.contacts_tree.delete(item)
 
         # Insert actual data from the AddressBook
-        for i, contact in enumerate(contacts, 1):
-            self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
-                                                      contact.phone_number, contact.email))
+        for i, contact in enumerate(self.contacts, 1):
+            self.contacts_tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                         contact.phone_number, contact.email))
 
         # Update idletasks to refresh the Treeview
-        self.super_tree.update_idletasks()
+        self.contacts_tree.update_idletasks()
 
     def show_contact_details(self, event):
         # Get the selected item
-        selected_item = self.super_tree.selection()
+        selected_item = self.contacts_tree.selection()
 
         if selected_item:
             # Find the index of the selected item
-            index = self.super_tree.index(selected_item[0])
-            # original_index = self.original_indices[index]
+            index = self.contacts_tree.index(selected_item[0])
 
             # Display a popup window with contact details
             self.show_contact_popup(index)
@@ -264,8 +261,7 @@ class GUIFunctions:
         popup.geometry("275x150")
 
         # Get the contact based on the index
-        selected_contact = address_book.contacts[index]
-        # original_index = self.original_indices[index]
+        selected_contact = self.contacts[index]
 
         # Display contact details in the popup window
         tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
@@ -294,7 +290,6 @@ class GUIFunctions:
 
     def super_table_display_sort(self, col):
         # Handle sorting contacts
-        contacts = address_book.contacts
 
         # Check if the column is already sorted
         if self.sort_order[col] == "asc":
@@ -305,11 +300,12 @@ class GUIFunctions:
             self.sort_order[col] = "asc"
 
         # Sort contacts
-        contacts.sort(key=lambda x: getattr(x, col), reverse=reverse_order)
+        self.contacts.sort(key=lambda x: getattr(x, col), reverse=reverse_order)
 
         # Update the treeview
         self.update_treeview()
 
+    # TODO: labels colors fix
     def show_search_popup(self, search_frame):
         input_search_frame = tk.Frame(search_frame, bg="white")
         input_search_frame.pack(side=tk.TOP, padx=5, pady=5)
@@ -334,8 +330,16 @@ class GUIFunctions:
         reset_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
 
         # Add a button to perform the search
-        exit_button = tk.Button(input_search_frame, text="Exit", command=lambda: input_search_frame.destroy())
+        exit_button = tk.Button(input_search_frame, text="Exit", command=lambda: on_closing())
         exit_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
+
+        def on_perform_search():
+
+            self.perform_search(entries)
+
+        def on_closing():
+            self.reset_contacts()
+            input_search_frame.destroy()
 
         # TODO: fix show_contact_popup, when we got search results, maybe create new tree with sorted contacts?
 
@@ -346,17 +350,21 @@ class GUIFunctions:
         phone_number = entries[2].get()
         email = entries[3].get()
 
-        print(name, surname, phone_number, email)
-
         # Perform the search based on the criteria
-        contacts = ContactController.search_contact(name, surname, phone_number, email)
+        self.contacts, self.unmatched_contacts = ContactController.search_contact(name, surname, phone_number, email)
 
         # Display the search results
-        self.update_treeview(contacts)
+        self.clear_frame(self.display_frame)
+        self.contacts_display()
 
     def reset_contacts(self):
-        # self.original_indices = list(range(len(address_book.contacts)))
-        self.update_treeview()
+        ContactController.reset_search()
+
+        self.contacts = address_book.contacts
+        self.unmatched_contacts = address_book.unmatched_contacts
+
+        self.clear_frame(self.display_frame)
+        self.contacts_display()
 
     def clear_contacts(self):
         logger.log_info("Clearing contacts.")
@@ -411,6 +419,7 @@ class GUIFunctions:
         # Start the main loop for the Toplevel window
         sort_window.mainloop()
 
+    # TODO: remove listbox, add treeview, clear recycle bin button
     def recycle_bin(self):
         # Function to handle restoring a contact from the recycle bin
         def restore_selected_contact():
@@ -472,3 +481,36 @@ class GUIFunctions:
         # Handle exiting the program
         self.root.destroy()
         sys.exit(0)
+
+    @staticmethod
+    def clear_frame(frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
+
+    @staticmethod
+    def index_calculate(sorted_contacts, contacts):
+        """
+        Calculate indices for sorted_contacts in contacts.
+
+        Parameters:
+        - sorted_contacts (list): List of contacts sorted in a specific order.
+        - contacts (list): Original list of contacts.
+
+        Returns:
+        - list: List of indices for sorted_contacts in contacts.
+        """
+        indices = []
+        for contact in sorted_contacts:
+            try:
+                index = contacts.index(contact)
+                indices.append(index)
+            except ValueError:
+                # Handle the case when contact is not found in contacts
+                indices.append(None)
+        return indices
+
+    # TODO:
+    #  - problemy gdy klika się reset, gdy kasuje się kontakt to i ma kasować się go z backupu, bo synergia nie wyrabia
+    #  - poprawić, żeby przy synergi nie klonowały się kontakty,
+    #  - problem z usuwaniem kontaktu po search, ogólnie dokładnie popatrzeć bo edit też nie jest pewny,
+    #  - dziś robię do białego rana żeby był spokój!

@@ -72,7 +72,7 @@ class GUI:
         self.gui_functions = GUIFunctions(self.master, super_table_frame)
 
         # Call super_table_display using the instance
-        self.gui_functions.super_table_display()
+        self.gui_functions.contacts_display()
 
         # Label for "Fun Fact" heading
         self.fun_fact_heading = tk.Label(self.master, text="Fun Fact:", font=("Helvetica", 12, "bold"), bg="#FFF5E1",
