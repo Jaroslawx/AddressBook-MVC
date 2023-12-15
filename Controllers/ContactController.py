@@ -8,7 +8,6 @@ class ContactController:
     def create_contact_and_add(first_name, last_name, phone, email):
         new_contact = Contact(first_name, last_name, phone, email)
         address_book.add_contact(new_contact)
-        address_book.backup_contacts.append(new_contact)
         logger.log_info(f"Contact {new_contact} added to the list.")
 
     @staticmethod
@@ -21,6 +20,7 @@ class ContactController:
     def search_contact(name="", surname="", phone="", email=""):
         # Create search results list
         results = []
+        other = []
 
         # Iterate over all contacts
         for contact in address_book.contacts:
@@ -31,13 +31,20 @@ class ContactController:
                     (not email or email.lower() in contact.email.lower()):
                 # Add the contact to the results list
                 results.append(contact)
+            else:
+                other.append(contact)
 
-        return results
+        return results, other
+
+    @staticmethod
+    def reset_search():
+        address_book.contacts.extend(address_book.unmatched_contacts)
+        address_book.unmatched_contacts.clear()
+        address_book.contacts.sort(key=lambda x: x.first_name)
 
     @staticmethod
     def restore_contact(index):
         address_book.contacts.append(address_book.removed_contacts[index])
-        address_book.backup_contacts.append(address_book.removed_contacts[index])
         address_book.removed_contacts.pop(index)
         logger.log_info(f"Contact restored from the recycle bin.")
 
@@ -52,12 +59,6 @@ class ContactController:
     @staticmethod
     def clear_contacts():
         address_book.contacts.clear()
+        address_book.unmatched_contacts.clear()
         address_book.removed_contacts.clear()
-        logger.log_info(f"Contacts cleared from the list and recycle bin.")
-
-    @staticmethod
-    def synchronize_contacts():
-        # Remove contacts from backup_contacts
-        for removed_contact in address_book.removed_contacts:
-            if removed_contact in address_book.backup_contacts:
-                address_book.backup_contacts.remove(removed_contact)
+        logger.log_info(f"Clearing all contacts from the lists.")
