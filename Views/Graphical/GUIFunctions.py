@@ -292,6 +292,9 @@ class GUIFunctions:
         # Update the treeview
         self.update_treeview()
 
+    def show_search_popup(self, search_frame):
+        pass
+
     def update_treeview(self, contacts=address_book.contacts):
         # Clear tree
         for item in self.super_tree.get_children():

@@ -1,7 +1,6 @@
 from utils.Log import logger
 from Controllers.FileController import FileController
 from Models.Trivia import trivia
-# from Models.AddressBook import address_book
 from Views.Graphical.GUIFunctions import GUIFunctions
 
 import tkinter as tk
@@ -41,14 +40,28 @@ class GUI:
         middle_frame.pack(expand=True, fill="both", padx=5, pady=5)
 
         # Create buttons
-        button_frame = tk.Frame(middle_frame, bg="white", bd=5, relief=tk.SUNKEN)
-        button_frame.pack(side=tk.LEFT, padx=5, pady=5)
+        left_frame = tk.Frame(middle_frame, bg="white", bd=5, relief=tk.FLAT)
+        left_frame.pack(side=tk.LEFT, padx=5, pady=5)
+
+        # Create buttons
+        search_frame = tk.Frame(left_frame, bg="white", bd=5, relief=tk.FLAT)
+        search_frame.pack(side=tk.TOP, padx=5, pady=5)
+
+        # Add search button
+        search_icon = tk.PhotoImage(file="assets/images/magnifier.png").subsample(12)
+        search_button = tk.Button(search_frame, image=search_icon, command=lambda: self.search_handler(search_frame))
+        search_button.image = search_icon
+        search_button.pack(side=tk.TOP, anchor=tk.N, pady=5)
+
+        # Create buttons
+        button_frame = tk.Frame(left_frame, bg="white", bd=5, relief=tk.SUNKEN)
+        button_frame.pack(side=tk.BOTTOM, padx=5, pady=5)
 
         buttons = ["Add contact", "Sort contacts", "Clear contacts", "Recycle bin", "Exit"]
 
         for button_label in buttons:
             button = tk.Button(button_frame, text=button_label,
-                               command=lambda label=button_label: self.button_handler(label), width=20, height=2)
+                               command=lambda label=button_label: self.button_handler(label), width=15, height=2)
             button.pack(side=tk.TOP, pady=5)
 
         # Create a frame for the table
@@ -68,7 +81,7 @@ class GUI:
 
         # Label for displaying a random fact
         self.fun_fact_label = tk.Label(self.master, text="", font=("Helvetica", 11), bg="#FFF5E1", fg="black",
-                                       wraplength=1000)
+                                       wraplength=900)
         self.fun_fact_label.pack(side=tk.TOP, anchor=tk.CENTER, padx=10, pady=10)
 
         # Display a random fact
@@ -89,6 +102,9 @@ class GUI:
 
         # Schedule the next update after 10 seconds
         self.master.after(10000, self.update_random_fact)
+
+    def search_handler(self, frame):
+        self.gui_functions.show_search_popup(frame)
 
     def button_handler(self, label):
         # Map button labels to corresponding methods in GUIFunctions
