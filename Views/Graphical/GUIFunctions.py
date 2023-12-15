@@ -13,6 +13,9 @@ class GUIFunctions:
         self.super_tree = None
         self.super_table_frame = super_table_frame
 
+        # List of original indices
+        self.original_indices = []
+
         # sort order for contacts
         self.sort_order = {"first_name": "desc", "last_name": "asc", "phone_number": "asc", "email": "asc"}
 
@@ -85,11 +88,11 @@ class GUIFunctions:
 
         self.add_contact()
 
-    def remove_contact(self, selected_index, popup=None):
+    def remove_contact(self, selected_index, popup):
         popup.destroy()
 
         # Handle removing a contact
-        if selected_index:
+        if 0 <= selected_index < len(address_book.contacts):
             # Confirm removal
             confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to remove this contact?")
             if confirmation:
@@ -104,7 +107,7 @@ class GUIFunctions:
         else:
             messagebox.showwarning("Warning", "Please select a contact to remove.")
 
-    def edit_contact(self, selected_index, popup=None):
+    def edit_contact(self, selected_index, popup):
         popup.destroy()
 
         # Get the selected contact
@@ -176,11 +179,11 @@ class GUIFunctions:
         GUIFunctions.center_window(edit_contact_window)
 
     def super_table_display(self, contacts=address_book.contacts):
-        logger.log_info("Displaying contacts.")
         # Handle displaying contacts
+        logger.log_info("Displaying contacts.")
 
-        # Sort contacts before displaying them
-        contacts.sort(key=lambda x: x.first_name)
+        # Add original indices
+        # self.original_indices = list(range(len(contacts)))
 
         logger.log_info("Displaying contacts in a Treeview widget.")
         # Create Treeview widget
@@ -227,6 +230,19 @@ class GUIFunctions:
         # Bind the click event to a function
         self.super_tree.bind("<ButtonRelease-1>", self.show_contact_details)
 
+    def update_treeview(self, contacts=address_book.contacts):
+        # Clear tree
+        for item in self.super_tree.get_children():
+            self.super_tree.delete(item)
+
+        # Insert actual data from the AddressBook
+        for i, contact in enumerate(contacts, 1):
+            self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                      contact.phone_number, contact.email))
+
+        # Update idletasks to refresh the Treeview
+        self.super_tree.update_idletasks()
+
     def show_contact_details(self, event):
         # Get the selected item
         selected_item = self.super_tree.selection()
@@ -234,6 +250,7 @@ class GUIFunctions:
         if selected_item:
             # Find the index of the selected item
             index = self.super_tree.index(selected_item[0])
+            # original_index = self.original_indices[index]
 
             # Display a popup window with contact details
             self.show_contact_popup(index)
@@ -248,6 +265,7 @@ class GUIFunctions:
 
         # Get the contact based on the index
         selected_contact = address_book.contacts[index]
+        # original_index = self.original_indices[index]
 
         # Display contact details in the popup window
         tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
@@ -272,7 +290,7 @@ class GUIFunctions:
         # Center the window on the screen
         GUIFunctions.center_window(popup)
 
-        GUIFunctions.update_treeview(self)
+        self.update_treeview()
 
     def super_table_display_sort(self, col):
         # Handle sorting contacts
@@ -293,20 +311,52 @@ class GUIFunctions:
         self.update_treeview()
 
     def show_search_popup(self, search_frame):
-        pass
+        input_search_frame = tk.Frame(search_frame, bg="white")
+        input_search_frame.pack(side=tk.TOP, padx=5, pady=5)
 
-    def update_treeview(self, contacts=address_book.contacts):
-        # Clear tree
-        for item in self.super_tree.get_children():
-            self.super_tree.delete(item)
+        # Display the old and new values
+        tk.Label(input_search_frame, text="Search Contact").pack(side=tk.TOP, anchor=tk.N)
 
-        # Insert actual data from the AddressBook
-        for i, contact in enumerate(contacts, 1):
-            self.super_tree.insert("", "end", values=(contact.first_name, contact.last_name,
-                                                      contact.phone_number, contact.email))
+        # Display labels and entry widgets for search criteria
+        labels = ["Name:", "Surname:", "Phone Number:", "Email:"]
+        entries = [tk.Entry(input_search_frame) for _ in range(len(labels))]
 
-        # Update idletasks to refresh the Treeview
-        self.super_tree.update_idletasks()
+        for label, entry in zip(labels, entries):
+            tk.Label(input_search_frame, text=label).pack(side=tk.TOP, anchor=tk.W)
+            entry.pack(side=tk.TOP, anchor=tk.N)
+
+        # Add a button to perform the search
+        search_button = tk.Button(input_search_frame, text="Search", command=lambda: self.perform_search(entries))
+        search_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
+
+        # Add a button to perform the search
+        reset_button = tk.Button(input_search_frame, text="Reset", command=lambda: self.reset_contacts())
+        reset_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
+
+        # Add a button to perform the search
+        exit_button = tk.Button(input_search_frame, text="Exit", command=lambda: input_search_frame.destroy())
+        exit_button.pack(side=tk.LEFT, anchor=tk.N, padx=5, pady=5)
+
+        # TODO: fix show_contact_popup, when we got search results, maybe create new tree with sorted contacts?
+
+    def perform_search(self, entries):
+        # Get search criteria from the entry widgets
+        name = entries[0].get()
+        surname = entries[1].get()
+        phone_number = entries[2].get()
+        email = entries[3].get()
+
+        print(name, surname, phone_number, email)
+
+        # Perform the search based on the criteria
+        contacts = ContactController.search_contact(name, surname, phone_number, email)
+
+        # Display the search results
+        self.update_treeview(contacts)
+
+    def reset_contacts(self):
+        # self.original_indices = list(range(len(address_book.contacts)))
+        self.update_treeview()
 
     def clear_contacts(self):
         logger.log_info("Clearing contacts.")

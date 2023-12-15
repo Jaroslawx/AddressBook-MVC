@@ -119,9 +119,6 @@ class GUI:
         # Get the corresponding method for the given label and call it
         button_mapping.get(label.lower().replace(" ", "_"), lambda: None)()
 
-        # Update the treeview
-        self.gui_functions.update_treeview()
-
     def load_contacts_from_file(self):
         # Load contacts from file
         FileController.load_contacts_and_add()
