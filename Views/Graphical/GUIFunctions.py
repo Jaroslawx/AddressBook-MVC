@@ -16,26 +16,12 @@ class GUIFunctions:
         # sort order for contacts
         self.sort_order = {"first_name": "desc", "last_name": "asc", "phone_number": "asc", "email": "asc"}
 
-    @staticmethod
-    def center_window(window):
-        logger.log_info("Centering window on screen.")
-        # Set the position of the window to the center of the screen
-        window.update_idletasks()
-
-        width = window.winfo_width()
-        height = window.winfo_height()
-        screen_width = window.winfo_screenwidth()
-        screen_height = window.winfo_screenheight()
-        x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
-
-        window.geometry(f"{width}x{height}+{x}+{y}")
-
     def add_contact(self):
         logger.log_info("Adding a contact.")
         # Handle adding a contact
         add_window = tk.Toplevel(self.root)
         add_window.title("Add Contact")
+        add_window.iconbitmap("assets/addcontact.ico")
 
         # Labels and Entry widgets for user input
         first_name_label = tk.Label(add_window, text="First Name:")
@@ -170,7 +156,12 @@ class GUIFunctions:
         update_button.grid(row=5, column=0, columnspan=2, pady=10)
 
         # Add a button to cancel the update
-        cancel_button = tk.Button(edit_contact_window, text="Cancel", command=edit_contact_window.destroy)
+        def on_cancel():
+            edit_contact_window.destroy()
+            self.show_contact_popup(selected_index)
+
+        # Add a button to cancel the update
+        cancel_button = tk.Button(edit_contact_window, text="Cancel", command=on_cancel)
         cancel_button.grid(row=5, column=1, columnspan=2, pady=10)
 
         # Center the window on the screen
@@ -225,18 +216,29 @@ class GUIFunctions:
         # Bind the click event to a function
         self.contacts_tree.bind("<ButtonRelease-1>", self.show_contact_details)
 
-    def update_treeview(self):
-        # Clear tree
-        for item in self.contacts_tree.get_children():
-            self.contacts_tree.delete(item)
+    def update_treeview(self, main_tree=True, treeview=None, contacts=address_book.contacts):
+        if main_tree:
+            # Clear tree
+            for item in self.contacts_tree.get_children():
+                self.contacts_tree.delete(item)
 
-        # Insert actual data from the AddressBook
-        for i, contact in enumerate(address_book.contacts, 1):
-            self.contacts_tree.insert("", "end", values=(contact.first_name, contact.last_name,
-                                                         contact.phone_number, contact.email))
+            # Insert actual data from the AddressBook
+            for i, contact in enumerate(address_book.contacts, 1):
+                self.contacts_tree.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                             contact.phone_number, contact.email))
+            # Update idletasks to refresh the Treeview
+            self.contacts_tree.update_idletasks()
+        else:
+            # Clear tree
+            for item in treeview.get_children():
+                treeview.delete(item)
 
-        # Update idletasks to refresh the Treeview
-        self.contacts_tree.update_idletasks()
+            # Insert actual data from the AddressBook
+            for i, contact in enumerate(contacts, 1):
+                treeview.insert("", "end", values=(contact.first_name, contact.last_name,
+                                                   contact.phone_number, contact.email))
+            # Update idletasks to refresh the Treeview
+            treeview.update_idletasks()
 
     def show_contact_details(self, event):
         # Get the selected item
@@ -348,7 +350,8 @@ class GUIFunctions:
         email = entries[3].get()
 
         # Perform the search based on the criteria
-        address_book.contacts, address_book.unmatched_contacts = ContactController.search_contact(name, surname, phone_number, email)
+        address_book.contacts, address_book.unmatched_contacts = ContactController.search_contact(name, surname,
+                                                                                                  phone_number, email)
 
         # Display the search results
         self.clear_frame(self.display_frame)
@@ -376,6 +379,7 @@ class GUIFunctions:
         sort_window = tk.Toplevel(self.root)
         sort_window.title("Sort Contacts")
         sort_window.geometry("300x200")
+        sort_window.iconbitmap("assets/sort.ico")
 
         # Function to handle sorting contacts
         def temp_sort(heading, reverse_flag):
@@ -416,62 +420,120 @@ class GUIFunctions:
         # Start the main loop for the Toplevel window
         sort_window.mainloop()
 
-    # TODO: remove listbox, add treeview, clear recycle bin button
     def recycle_bin(self):
-        # Function to handle restoring a contact from the recycle bin
-        def restore_selected_contact():
-            selected_index = listbox.curselection()
-            if selected_index:
-                # Confirm restoration
-                confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to restore this contact?")
-                if confirmation:
-                    # Restore the contact to the main address book
-                    ContactController.restore_contact(selected_index[0])
-                    # Update the recycle bin
-                    update_recycle_bin()
-                    messagebox.showinfo("Success", "Contact restored successfully.")
-            else:
-                messagebox.showwarning("Warning", "Please select a contact to restore.")
+        def show_removed_details(event):
+            # Get the selected item
+            selected_item = treeview.selection()
 
-        # Function to update the recycle bin after restoring a contact
-        def update_recycle_bin():
-            # Clear the current contents of the Listbox
-            listbox.delete(0, tk.END)
+            if selected_item:
+                # Find the index of the selected item
+                index = treeview.index(selected_item[0])
 
-            # Populate the Listbox with contact names
-            for c in address_book.removed_contacts:
-                listbox.insert(tk.END,
-                               f"{c.first_name} {c.last_name} {c.phone_number} {c.email}")
+                # Display a popup window with contact details
+                self.removed_contact_popup(index, treeview)
 
-            # Update the treeview
+        def restore_all_contacts():
+            ContactController.restore_all_contacts()
+            restore_window.destroy()
+
             self.update_treeview()
+            messagebox.showinfo("Success", "All contacts restored successfully.")
+
+        def clear_recycle_bin():
+            # Clear the removed contacts
+            address_book.removed_contacts.clear()
+
+            restore_window.destroy()
+            messagebox.showinfo("Success", "Recycle bin cleared successfully.")
 
         # Display a Toplevel window to show the list of contacts
         restore_window = tk.Toplevel(self.root)
         restore_window.title("Recycle Bin")
-        restore_window.geometry("500x400")
+        restore_window.geometry("900x300")
+        restore_window.iconbitmap("assets/bin.ico")
 
-        # Create Listbox widget for the recycle bin
-        listbox = tk.Listbox(restore_window, selectmode=tk.SINGLE, width=90, height=20)
-        listbox.pack(padx=10, pady=10)
+        # Create Treeview widget for the recycle bin
+        treeview = ttk.Treeview(restore_window, columns=("first_name", "last_name", "phone_number", "email"),
+                                show="headings", selectmode="browse")
+        treeview.heading("first_name", text="First Name")
+        treeview.heading("last_name", text="Last Name")
+        treeview.heading("phone_number", text="Phone Number")
+        treeview.heading("email", text="Email")
+        treeview.pack(padx=10, pady=10)
 
-        # Populate the Listbox with contact names from the removed contacts
+        # Populate the Treeview with contact details from the removed contacts
         for contact in address_book.removed_contacts:
-            listbox.insert(tk.END, f"{contact.first_name} {contact.last_name} {contact.phone_number} {contact.email}")
+            treeview.insert("", "end", iid=contact, values=(contact.first_name, contact.last_name,
+                                                            contact.phone_number, contact.email))
 
-        # Add a button to remove the selected contact
-        restore_button = tk.Button(restore_window, text="Restore Contact", command=restore_selected_contact)
-        restore_button.pack(side=tk.LEFT, padx=5, pady=10)
+        # Przypisz funkcję obsługi zdarzeń do Treeview
+        treeview.bind("<ButtonRelease-1>", show_removed_details)
+
+        # Add a button to restore all contacts
+        restore_all_button = tk.Button(restore_window, text="Restore All", command=restore_all_contacts)
+        restore_all_button.pack(side=tk.LEFT, anchor=tk.S, padx=5, pady=10)
+
+        # Add a button to clear the recycle bin
+        clear_button = tk.Button(restore_window, text="Clear Bin", command=clear_recycle_bin)
+        clear_button.pack(side=tk.LEFT, anchor=tk.S, padx=5, pady=10)
 
         # Add a button to exit the loop and close the window
         exit_button = tk.Button(restore_window, text="Exit", command=restore_window.destroy)
-        exit_button.pack(side=tk.LEFT, padx=5, pady=10)
+        exit_button.pack(side=tk.LEFT, anchor=tk.S, padx=5, pady=10)
 
         # Center the window on the screen
         GUIFunctions.center_window(restore_window)
 
-        # Start the main loop for the Toplevel window
-        restore_window.mainloop()
+        # Update the treeview
+        self.update_treeview(False, treeview, address_book.removed_contacts)
+
+    def removed_contact_popup(self, index, treeview):
+        # Create a popup window with contact details
+        popup = tk.Toplevel(self.root)
+        popup.title("Removed Contact")
+
+        # Set the dimensions of the popup window
+        popup.geometry("275x150")
+
+        # Get the contact based on the index
+        selected_contact = address_book.removed_contacts[index]
+
+        # Display contact details in the popup window
+        tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
+            anchor="w")
+        tk.Label(popup, text=f"Last Name: {selected_contact.last_name}", font=("Helvetica", 10, "bold")).pack(
+            anchor="w")
+        tk.Label(popup, text=f"Phone Number: {selected_contact.phone_number}", font=("Helvetica", 10, "bold")).pack(
+            anchor="w")
+        tk.Label(popup, text=f"Email: {selected_contact.email}", font=("Helvetica", 10, "bold")).pack(anchor="w")
+
+        # Add buttons for editing and deleting the contact
+        button_frame = tk.Frame(popup)
+        button_frame.pack(side=tk.BOTTOM)
+
+        tk.Button(button_frame, text="Restore Contact", command=lambda: on_restore()).pack(
+            side=tk.LEFT, padx=10, pady=10)
+        tk.Button(button_frame, text="Delete Contact", command=lambda: on_delete()).pack(
+            side=tk.LEFT, padx=10, pady=10)
+        tk.Button(button_frame, text="Exit", command=lambda: on_exit()).pack(
+            side=tk.LEFT, padx=10, pady=10)
+
+        def on_restore():
+            ContactController.restore_contact(index)
+            self.update_treeview()
+            self.update_treeview(False, treeview, address_book.removed_contacts)
+            popup.destroy()
+
+        def on_delete():
+            address_book.removed_contacts.pop(index)
+            self.update_treeview(False, treeview, address_book.removed_contacts)
+            popup.destroy()
+
+        def on_exit():
+            popup.destroy()
+
+        # Center the window on the screen
+        GUIFunctions.center_window(popup)
 
     def exit_program(self):
         logger.log_info("Application closed.")
@@ -485,29 +547,24 @@ class GUIFunctions:
             widget.destroy()
 
     @staticmethod
-    def index_calculate(sorted_contacts, contacts):
-        """
-        Calculate indices for sorted_contacts in contacts.
+    def center_window(window):
+        logger.log_info("Centering window on screen.")
+        # Set the position of the window to the center of the screen
+        window.update_idletasks()
 
-        Parameters:
-        - sorted_contacts (list): List of contacts sorted in a specific order.
-        - contacts (list): Original list of contacts.
+        width = window.winfo_width()
+        height = window.winfo_height()
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
 
-        Returns:
-        - list: List of indices for sorted_contacts in contacts.
-        """
-        indices = []
-        for contact in sorted_contacts:
-            try:
-                index = contacts.index(contact)
-                indices.append(index)
-            except ValueError:
-                # Handle the case when contact is not found in contacts
-                indices.append(None)
-        return indices
+        window.geometry(f"{width}x{height}+{x}+{y}")
 
     # TODO:
-    #  - problemy gdy klika się reset, gdy kasuje się kontakt to i ma kasować się go z backupu, bo synergia nie wyrabia
-    #  - poprawić, żeby przy synergi nie klonowały się kontakty,
-    #  - problem z usuwaniem kontaktu po search, ogólnie dokładnie popatrzeć bo edit też nie jest pewny,
-    #  - dziś robię do białego rana żeby był spokój!
+    #  - dodać w search, jak klikniesz enter to wyszukuje od razu,
+    #  - poprawić odświeżanie i wyskakiwanie okna w bin
+    #  - poprawić kolory w search
+    #  - search można tylko raz wywołać, dodać, żeby nie było 2 na ekranie
+    #  - dodać sortowanie w koszu
+    #  - usunąć duplikaty w kodzie

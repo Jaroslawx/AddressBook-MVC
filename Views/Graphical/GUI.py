@@ -14,7 +14,7 @@ class GUI:
         self.master.config(bg="#FFF5E1")
         self.master.resizable(False, False)
         self.master.title("Address Book")
-        self.master.iconbitmap("assets/icon.ico")
+        self.master.iconbitmap("assets/addressbook.ico")
 
         # Create menu bar
         menubar = tk.Menu(self.master)
