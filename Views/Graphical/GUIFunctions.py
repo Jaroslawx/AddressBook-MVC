@@ -12,7 +12,7 @@ class GUIFunctions:
         self.root = master
         self.contacts_tree = None
         self.display_frame = display_frame
-
+        self.is_search_displayed = False
         # sort order for contacts
         self.sort_order = {"first_name": "desc", "last_name": "asc", "phone_number": "asc", "email": "asc"}
 
@@ -165,7 +165,7 @@ class GUIFunctions:
         cancel_button.grid(row=5, column=1, columnspan=2, pady=10)
 
         # Center the window on the screen
-        GUIFunctions.center_window(edit_contact_window)
+        self.center_window(edit_contact_window)
 
     def contacts_display(self):
         # Handle displaying contacts
@@ -251,16 +251,12 @@ class GUIFunctions:
             # Display a popup window with contact details
             self.show_contact_popup(index)
 
-    def show_contact_popup(self, index):
-        # Create a popup window with contact details
-        popup = tk.Toplevel(self.root)
-        popup.title("Contact Details")
-
+    def contact_popup(self, popup, index, contacts):
         # Set the dimensions of the popup window
         popup.geometry("275x150")
 
         # Get the contact based on the index
-        selected_contact = address_book.contacts[index]
+        selected_contact = contacts[index]
 
         # Display contact details in the popup window
         tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
@@ -275,15 +271,24 @@ class GUIFunctions:
         button_frame = tk.Frame(popup)
         button_frame.pack(side=tk.BOTTOM)
 
+        # Center the window on the screen
+        self.center_window(popup)
+
+        return button_frame
+
+    def show_contact_popup(self, index):
+        # Create a popup window with contact details
+        popup = tk.Toplevel(self.root)
+        popup.title("Contact Details")
+
+        button_frame = self.contact_popup(popup, index, address_book.contacts)
+
         tk.Button(button_frame, text="Edit Contact", command=lambda: self.edit_contact(index, popup)).pack(
             side=tk.LEFT, padx=10, pady=10)
         tk.Button(button_frame, text="Delete Contact", command=lambda: self.remove_contact(index, popup)).pack(
             side=tk.LEFT, padx=10, pady=10)
         tk.Button(button_frame, text="Exit", command=lambda: popup.destroy()).pack(
             side=tk.LEFT, padx=10, pady=10)
-
-        # Center the window on the screen
-        GUIFunctions.center_window(popup)
 
         self.update_treeview()
 
@@ -304,20 +309,19 @@ class GUIFunctions:
         # Update the treeview
         self.update_treeview()
 
-    # TODO: labels colors fix
     def show_search_popup(self, search_frame):
         input_search_frame = tk.Frame(search_frame, bg="white")
         input_search_frame.pack(side=tk.TOP, padx=5, pady=5)
 
         # Display the old and new values
-        tk.Label(input_search_frame, text="Search Contact").pack(side=tk.TOP, anchor=tk.N)
+        tk.Label(input_search_frame, text="Search Contact", bg="white").pack(side=tk.TOP, anchor=tk.N)
 
         # Display labels and entry widgets for search criteria
         labels = ["Name:", "Surname:", "Phone Number:", "Email:"]
         entries = [tk.Entry(input_search_frame) for _ in range(len(labels))]
 
         for label, entry in zip(labels, entries):
-            tk.Label(input_search_frame, text=label).pack(side=tk.TOP, anchor=tk.W)
+            tk.Label(input_search_frame, text=label, bg="white").pack(side=tk.TOP, anchor=tk.W)
             entry.pack(side=tk.TOP, anchor=tk.N)
 
         # Add a button to perform the search
@@ -341,6 +345,7 @@ class GUIFunctions:
         def on_closing():
             self.reset_contacts()
             input_search_frame.destroy()
+            self.is_search_displayed = False
 
     def perform_search(self, entries):
         # Get search criteria from the entry widgets
@@ -415,7 +420,7 @@ class GUIFunctions:
         exit_button.pack(pady=10)
 
         # Center the window on the screen
-        GUIFunctions.center_window(sort_window)
+        self.center_window(sort_window)
 
         # Start the main loop for the Toplevel window
         sort_window.mainloop()
@@ -466,7 +471,7 @@ class GUIFunctions:
             treeview.insert("", "end", iid=contact, values=(contact.first_name, contact.last_name,
                                                             contact.phone_number, contact.email))
 
-        # Przypisz funkcję obsługi zdarzeń do Treeview
+        # Bind the click event to a function
         treeview.bind("<ButtonRelease-1>", show_removed_details)
 
         # Add a button to restore all contacts
@@ -482,7 +487,7 @@ class GUIFunctions:
         exit_button.pack(side=tk.LEFT, anchor=tk.S, padx=5, pady=10)
 
         # Center the window on the screen
-        GUIFunctions.center_window(restore_window)
+        self.center_window(restore_window)
 
         # Update the treeview
         self.update_treeview(False, treeview, address_book.removed_contacts)
@@ -492,24 +497,7 @@ class GUIFunctions:
         popup = tk.Toplevel(self.root)
         popup.title("Removed Contact")
 
-        # Set the dimensions of the popup window
-        popup.geometry("275x150")
-
-        # Get the contact based on the index
-        selected_contact = address_book.removed_contacts[index]
-
-        # Display contact details in the popup window
-        tk.Label(popup, text=f"First Name: {selected_contact.first_name}", font=("Helvetica", 10, "bold")).pack(
-            anchor="w")
-        tk.Label(popup, text=f"Last Name: {selected_contact.last_name}", font=("Helvetica", 10, "bold")).pack(
-            anchor="w")
-        tk.Label(popup, text=f"Phone Number: {selected_contact.phone_number}", font=("Helvetica", 10, "bold")).pack(
-            anchor="w")
-        tk.Label(popup, text=f"Email: {selected_contact.email}", font=("Helvetica", 10, "bold")).pack(anchor="w")
-
-        # Add buttons for editing and deleting the contact
-        button_frame = tk.Frame(popup)
-        button_frame.pack(side=tk.BOTTOM)
+        button_frame = self.contact_popup(popup, index, address_book.removed_contacts)
 
         tk.Button(button_frame, text="Restore Contact", command=lambda: on_restore()).pack(
             side=tk.LEFT, padx=10, pady=10)
@@ -533,7 +521,7 @@ class GUIFunctions:
             popup.destroy()
 
         # Center the window on the screen
-        GUIFunctions.center_window(popup)
+        self.center_window(popup)
 
     def exit_program(self):
         logger.log_info("Application closed.")
@@ -560,11 +548,3 @@ class GUIFunctions:
         y = (screen_height - height) // 2
 
         window.geometry(f"{width}x{height}+{x}+{y}")
-
-    # TODO:
-    #  - dodać w search, jak klikniesz enter to wyszukuje od razu,
-    #  - poprawić odświeżanie i wyskakiwanie okna w bin
-    #  - poprawić kolory w search
-    #  - search można tylko raz wywołać, dodać, żeby nie było 2 na ekranie
-    #  - dodać sortowanie w koszu
-    #  - usunąć duplikaty w kodzie

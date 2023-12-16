@@ -87,7 +87,7 @@ class GUI:
         # Display a random fact
         self.update_random_fact()
 
-        GUIFunctions.center_window(self.master)
+        self.gui_functions.center_window(self.master)
 
     def update_date(self):
         # Update the date label
@@ -104,7 +104,9 @@ class GUI:
         self.master.after(10000, self.update_random_fact)
 
     def search_handler(self, frame):
-        self.gui_functions.show_search_popup(frame)
+        if not self.gui_functions.is_search_displayed:
+            self.gui_functions.show_search_popup(frame)
+            self.gui_functions.is_search_displayed = True
 
     def button_handler(self, label):
         # Map button labels to corresponding methods in GUIFunctions
