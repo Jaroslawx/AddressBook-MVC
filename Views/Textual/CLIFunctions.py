@@ -178,7 +178,7 @@ class CLIFunctions:
 
         while True:
             CLIFunctions.display_list(remove_window, contacts, visible_start, visible_rows, selected_contact_index,
-                                   "Remove contact:", "Press esc to leave.")
+                                      "Remove contact:", "Press esc to leave.")
 
             # Wait for key
             key = remove_window.getch()
@@ -316,7 +316,7 @@ class CLIFunctions:
 
         while True:
             CLIFunctions.display_list(edit_window, contacts, visible_start, visible_rows, selected_contact_index,
-                                   "Edit contact:", "Press esc to leave.")
+                                      "Edit contact:", "Press esc to leave.")
 
             # Wait for key
             key = edit_window.getch()
@@ -371,20 +371,22 @@ class CLIFunctions:
                         elif key == 10:
                             if selected_option == 0:
                                 contacts[selected_contact_index].first_name = CLIFunctions.input_text(stdscr,
-                                                                                                   "First Name: ",
+                                                                                                      "First Name: ",
                                                                                                       first_name)
 
                             elif selected_option == 1:
-                                contacts[selected_contact_index].last_name = CLIFunctions.input_text(stdscr, "Last Name: ",
+                                contacts[selected_contact_index].last_name = CLIFunctions.input_text(stdscr,
+                                                                                                     "Last Name: ",
                                                                                                      last_name)
 
                             elif selected_option == 2:
                                 contacts[selected_contact_index].phone_number = CLIFunctions.input_text(stdscr,
-                                                                                                     "Phone Number: ",
+                                                                                                        "Phone Number: ",
                                                                                                         phone_number)
 
                             elif selected_option == 3:
-                                contacts[selected_contact_index].email = CLIFunctions.input_text(stdscr, "Email: ", email)
+                                contacts[selected_contact_index].email = CLIFunctions.input_text(stdscr, "Email: ",
+                                                                                                 email)
 
                             elif selected_option == 4:
                                 # Confirmation changes
@@ -418,7 +420,7 @@ class CLIFunctions:
 
         while True:
             CLIFunctions.display_list(recycle_bin_window, contacts, visible_start, visible_rows, selected_contact_index,
-                                   "Recycle bin:", "Press esc to leave.")
+                                      "Recycle bin:", "Press esc to leave.")
 
             # Wait for key
             key = recycle_bin_window.getch()
